@@ -9,6 +9,7 @@ import Learn from './pages/Learn.jsx';
 import SearchAndSort from './pages/SearchAndSort.jsx';
 import Collection from './pages/CollectionPage.jsx';
 import NFT from './pages/NFTPage.jsx';
+import Auction from './pages/Auction.jsx';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/mint-nft" element={<MintNFT />} />
         <Route path="/upload-nft" element={<UploadNFT />} />
         <Route path="/learn" element={<Learn />} />
+        <Route path="/auction" element={<Auction />} />
         <Route path="/search-and-sort" element={<SearchAndSort/>} />
         <Route path="/collection/:collectionId" element={<Collection/>} />
         <Route path="/nft/:nftId" element={<NFT />} />

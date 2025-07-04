@@ -1,0 +1,20 @@
+{
+  "name": "hardhat-project",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon --watch scripts/interact.js",
+    "deploy": "npx hardhat run scripts/deploy.js"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.0.0",
+    "@openzeppelin/contracts": "^4.9.5",
+    "hardhat": "^2.25.0",
+    "nodemon": "^3.1.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1",
+    "ipfs-http-client": "^59.0.0"
+  }
+}
