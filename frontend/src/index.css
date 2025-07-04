@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply m-0 p-0 box-border text-text-primary font-['Inter','Kantumruy_Pro',-apple-system,BlinkMacSystemFont,sans-serif];
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-radial-gradient-1 bg-radial-gradient-2 bg-radial-gradient-3 bg-main-gradient min-h-screen overflow-x-hidden leading-relaxed bg-background;
+  }
+
+  /* Animated Background Elements */
+  body::before,
+  body::after {
+    content: '';
+    @apply fixed w-[300px] h-[300px] rounded-full opacity-10 blur-[80px] -z-10 bg-accent-gradient;
+  }
+
+  body::before {
+    @apply top-[10%] left-[10%] animate-float;
+  }
+
+  body::after {
+    @apply bottom-[10%] right-[10%] animate-float-delayed;
+  }
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .glass-bg {
+    @apply bg-glass-bg backdrop-blur-[30px] border border-glass-border;
+  }
+
+  .accent-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary;
+  }
+
+  .accent-gradient-hover {
+    @apply hover:bg-gradient-to-r hover:from-secondary hover:to-primary;
+  }
+
+  .bg-accent-gradient {
+    background-image: linear-gradient(90deg, #00dc82, #6c5ce7);
+  }
+
+  .bg-accent-gradient-hover:hover {
+    background-image: linear-gradient(90deg, #6c5ce7, #00dc82);
+  }
+
+  .shimmer-line {
+    @apply bg-accent-gradient h-[3px] absolute top-0 left-0 right-0 w-full;
+    animation: shimmer 2s ease-in-out infinite;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+  }
+
+  /* Hide scrollbar for all browsers */
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+}
