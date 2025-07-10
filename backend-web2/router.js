@@ -1,8 +1,12 @@
 import express from 'express';
-import { registerUser, loginUser ,logoutUser, authMiddleware, getProfile, updateProfile, changePassword, googleLogin, verifyEmail } from './controllers/authController.js';
-import { upload } from './cloudinary.js';
-import { saveNFT, getAllNFTs, getNFTById } from './controllers/nftController.js';
-import {saveAuction, getAllAuctions, getAuctionById} from './controllers/auctionController.js';
+import { registerUser, loginUser ,logoutUser, authMiddleware, getProfile, updateProfile, changePassword, googleLogin, verifyEmail } from './authController.js';
+import { upload } from './cloudinary.js'; // multer config
+import {
+  uploadImageToIPFS,
+  uploadDataToIPFS,
+  getDataByCid,
+  listDataByGroup
+} from './ipfs.js';
 
 const router = express.Router();
 
@@ -29,12 +33,10 @@ router.get('/user/profile', authMiddleware, getProfile);
 router.put('/user/profile', authMiddleware, upload.single('profilePicture'), updateProfile);
 router.put('/user/password', authMiddleware, changePassword);
 
-// NFT and Auction routes
-router.post('/nft', saveNFT);
-router.get('/nfts', getAllNFTs);
-router.get('/nft/:tokenId', getNFTById);
-router.post('/auction', saveAuction);
-router.get('/auctions', getAllAuctions);
-router.get('/auction/:auctionId', getAuctionById);
+// IPFS Routes
+router.post('/upload-image', upload.single('file'), uploadImageToIPFS); // image upload
+router.post('/upload-data', uploadDataToIPFS); // metadata upload (JSON only)
+router.get('/data/:cid', getDataByCid);
+router.get('/data-group', listDataByGroup);
 
 export default router;

@@ -4,28 +4,77 @@ import Profile from './pages/Profile.jsx';
 import Login from './pages/Login.jsx';
 import SignUp from './pages/SignUp.jsx';
 import MintNFT from './pages/MintNFT.jsx';
-import UploadNFT from './pages/UploadNFT.jsx';
 import Learn from './pages/Learn.jsx';
 import SearchAndSort from './pages/SearchAndSort.jsx';
 import Collection from './pages/CollectionPage.jsx';
 import NFT from './pages/NFTPage.jsx';
 import Auction from './pages/Auction.jsx';
+import CheckAuth from './components/check-auth.jsx';
+import { checkAuth } from './store/authSlice.js';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
 
 function App() {
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch]);
+
+
   return (
     <div>
       <Routes>
-        <Route path="/" element={<HomePage/>} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/mint-nft" element={<MintNFT />} />
-        <Route path="/upload-nft" element={<UploadNFT />} />
-        <Route path="/learn" element={<Learn />} />
-        <Route path="/auction" element={<Auction />} />
-        <Route path="/search-and-sort" element={<SearchAndSort/>} />
-        <Route path="/collection/:collectionId" element={<Collection/>} />
-        <Route path="/nft/:nftId" element={<NFT />} />
+        <Route path="/" element={
+          <CheckAuth isAuthenticated={isAuthenticated} >
+            <HomePage />
+          </CheckAuth>
+        } />
+        <Route path="/profile" element={
+          <CheckAuth isAuthenticated={isAuthenticated} >
+            <Profile />
+          </CheckAuth>
+        } />
+        <Route path="/login" element={
+          <CheckAuth isAuthenticated={isAuthenticated} >
+            <Login />
+          </CheckAuth>
+        } />
+        <Route path="/signup" element={
+          <CheckAuth isAuthenticated={isAuthenticated}>
+            <SignUp />
+          </CheckAuth>
+        } />
+        <Route path="/mint-nft" element={
+          <CheckAuth isAuthenticated={isAuthenticated} >
+            <MintNFT />
+          </CheckAuth>
+        } />
+        <Route path="/auction" element={
+          <CheckAuth isAuthenticated={isAuthenticated} >
+            <Auction />
+          </CheckAuth>
+        } />
+        <Route path="/search-and-sort" element={
+          <CheckAuth isAuthenticated={isAuthenticated} >
+            <SearchAndSort />
+          </CheckAuth>
+        } />
+        <Route path="/learn" element={
+          <CheckAuth isAuthenticated={isAuthenticated}>
+            <Learn />
+          </CheckAuth>
+        } /> 
+         <Route path="/collection" element={
+          <CheckAuth isAuthenticated={isAuthenticated} >
+            <Collection />
+          </CheckAuth>
+        } />
+        <Route path="/nft" element={
+          <CheckAuth isAuthenticated={isAuthenticated}>
+            <NFT />
+          </CheckAuth>
+        } />
         {/* Add more routes as needed */}
         <Route path="*" element={<h1>Page Not Found</h1>} />
       </Routes>

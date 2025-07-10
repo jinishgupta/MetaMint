@@ -2,9 +2,19 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser as faUserRegular } from "@fortawesome/free-regular-svg-icons";
 import mintbitLogo from '../assets/mintbit-brands.svg';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import {logoutUser} from '../store/authSlice.js';
 
 function Header() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const {isAuthenticated} = useSelector((state) => state.auth);
+    
+    const handleLogOut = () => {
+        dispatch(logoutUser());
+        navigate('/login');
+    }
+
     return (
         <div>
             <style>{`
@@ -54,10 +64,15 @@ function Header() {
                         Profile
                         <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-green-400 to-blue-800 transition-all duration-300 transform -translate-x-1/2 group-hover:w-4/5 rounded"></span>
                     </p>
-                    <p className="text-gray-500 font-semibold px-4 py-2 rounded-lg transition-all flex items-center h-10 hover:text-green-400 hover:bg-white/10 hover:-translate-y-0.5 relative group" onClick={() => navigate('/login')}>
+                    {isAuthenticated ? 
+                    <p className="text-gray-500 font-semibold px-4 py-2 rounded-lg transition-all flex items-center h-10 hover:text-green-400 hover:bg-white/10 hover:-translate-y-0.5 relative group" onClick={handleLogOut}>
+                    LogOut
+                    <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-green-400 to-blue-800 transition-all duration-300 transform -translate-x-1/2 group-hover:w-4/5 rounded"></span>
+                    </p>
+                    :<p className="text-gray-500 font-semibold px-4 py-2 rounded-lg transition-all flex items-center h-10 hover:text-green-400 hover:bg-white/10 hover:-translate-y-0.5 relative group" onClick={() => navigate('/login')}>
                         Login
                         <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-green-400 to-blue-800 transition-all duration-300 transform -translate-x-1/2 group-hover:w-4/5 rounded"></span>
-                    </p>
+                    </p>}
                     
                     {/* Wallet Button */}
                     <button className="bg-gradient-to-r from-green-400 to-blue-800 text-background border-none px-5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-300 uppercase tracking-wider shadow-md h-10 flex items-center hover:border-green-400 hover:text-background hover:-translate-y-0.5 hover:shadow-lg">
@@ -73,7 +88,7 @@ function Header() {
                         <div className="hidden group-hover:block absolute right-0 top-[calc(100%+0.75rem)] min-w-[200px] bg-surface backdrop-blur-[20px] border border-[rgba(255,255,255,0.1)] rounded-lg shadow-xl overflow-hidden animate-slideDown z-[1001]">
                             <div className="py-1">
                                 <p onClick={() => navigate('/mint-nft')} className="text-text-primary px-5 py-3.5 block text-sm font-medium transition-all duration-300 border-l-3 border-transparent hover:bg-green-400 hover:text-background hover:border-l-background hover:pl-6">Mint NFTs</p>
-                                <p onClick={() => navigate('/upload-nft')} className="text-text-primary px-5 py-3.5 block text-sm font-medium transition-all duration-300 border-l-3 border-transparent hover:bg-green-400 hover:text-background hover:border-l-background hover:pl-6">Upload NFTs</p>
+                                <p onClick={() => navigate('/auction')} className="text-text-primary px-5 py-3.5 block text-sm font-medium transition-all duration-300 border-l-3 border-transparent hover:bg-green-400 hover:text-background hover:border-l-background hover:pl-6">Auctions</p>
                                 <p onClick={() => navigate('/learn')} className="text-text-primary px-5 py-3.5 block text-sm font-medium transition-all duration-300 border-l-3 border-transparent hover:bg-green-400 hover:text-background hover:border-l-background hover:pl-6">Learn</p>
                                 <p className="text-text-primary px-5 py-3.5 block text-sm font-medium transition-all duration-300 border-l-3 border-transparent hover:bg-green-400 hover:text-background hover:border-l-background hover:pl-6">Support</p>
                             </div>

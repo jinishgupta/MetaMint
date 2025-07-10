@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import User from '../models/user.js'
+import User from './user.js'
 import {OAuth2Client} from 'google-auth-library'
-import { imageUploadUtil } from '../cloudinary.js'
+import { imageUploadUtil } from './cloudinary.js'
 import nodemailer from 'nodemailer'
 import dotenv from 'dotenv'
 dotenv.config()

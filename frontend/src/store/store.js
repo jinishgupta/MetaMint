@@ -1,13 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./authSlice";
-import nftReducer from "./nftSlice";
-import auctionReducer from "./auctionSlice";
+import ipfsReducer from "./ipfsSlice";
 
 const store = configureStore({
   reducer: {
     auth:authReducer,
-    nft:nftReducer,
-    auction:auctionReducer,
+    ipfs: ipfsReducer
   },
 });
 

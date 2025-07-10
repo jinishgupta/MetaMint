@@ -25,7 +25,8 @@
     "multer": "^2.0.1",
     "nodemailer": "^7.0.3",
     "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0"
+    "passport-google-oauth20": "^2.0.0",
+    "pinata": "^2.4.9"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

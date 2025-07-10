@@ -1,14 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {faChevronUp} from '@fortawesome/free-solid-svg-icons';
-import NFTCard from '../components/NFTCard';
-import CollectionCard from '../components/CollectionCard';
-import HeroElement from '../components/HeroElement';
-import flowers from '../assets/sample.jpg';
-import sample2 from '../assets/sample2.jpg';
-import sample3 from '../assets/sample3.jpg';
 import { useRef } from 'react';
 
-function ScrollingLayout({heading}) {
+function ScrollingLayout({ heading, items = [], renderItem, emptyMessage }) {
     const scrollRef = useRef(null);
 
     const scrollByAmount = (amount) => {
@@ -40,14 +34,15 @@ function ScrollingLayout({heading}) {
                 ref={scrollRef}
                 className='overflow-x-auto scrollbar-hide flex-1 min-w-0 p-4 mx-6 whitespace-nowrap flex gap-4 snap-x snap-mandatory'
             >
-                <div className='inline-flex snap-start'><HeroElement /></div>
-                <div className='inline-flex snap-start'><HeroElement /></div>
-                <div className='inline-flex snap-start'><HeroElement /></div>
-                <div className='inline-flex snap-start'><HeroElement /></div>
-                <div className='inline-flex snap-start'><HeroElement /></div>
-                <div className='inline-flex snap-start'><HeroElement /></div>
-                <div className='inline-flex snap-start'><HeroElement /></div>
-                <div className='inline-flex snap-start'><HeroElement /></div>
+                {items && items.length > 0 ? (
+                  items.map((item, idx) => (
+                    <div className='inline-flex snap-start' key={idx}>
+                      {renderItem(item, idx)}
+                    </div>
+                  ))
+                ) : (
+                  <div className='inline-flex snap-start'><span className='text-white'>{emptyMessage || 'No items to display'}</span></div>
+                )}
             </div>
             {/* Right Scroll Icon */}
             <button
