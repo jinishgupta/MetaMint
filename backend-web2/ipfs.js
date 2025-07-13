@@ -81,10 +81,12 @@ const uploadDataToIPFS = async (req, res) => {
       console.error('Invalid groupId:', groupId);
       return res.status(400).json({ success: false, message: 'Invalid groupId for Pinata group' });
     }
-    console.log('Uploading to groupId:', groupId);
     let metadataUpload = pinata.upload.public.json(data).group(groupId);
+    // Set the file name if provided
+    if (data.name) {
+      metadataUpload = metadataUpload.name(data.name + '.json');
+    }
     const metadataResult = await metadataUpload;
-    console.log("Metadata Result: ", metadataResult);
     // Fallback: If group_id is not set in result, add file to group after upload
     if (!metadataResult.group_id || metadataResult.group_id !== groupId) {
       try {
@@ -136,9 +138,26 @@ const listDataByGroup = async (req, res) => {
   }
 };
 
+const listDataByName = async (req,res) => {
+  try{
+    const {name} = req.query;
+    const fileResult = await pinata.files.public.list().name(name);
+    const fileArray = Array.isArray(fileResult.files) ? fileResult.files : [];
+    const urls = fileArray.map(file => {
+      const cid = file.cid;
+      if (!cid) return null;
+      return `${process.env.GATEWAY_URL}/ipfs/${cid}`;
+    }).filter(Boolean);
+    res.json({ success: true, nfts: urls });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
 export {
   uploadImageToIPFS,
   uploadDataToIPFS,
   getDataByCid,
-  listDataByGroup
+  listDataByGroup,
+  listDataByName
 };

@@ -1,12 +1,51 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import NFTCard from '../components/NFTCard';
+import { fetchDataByName } from '../store/ipfsSlice';
+import { useDispatch } from 'react-redux';
 
 function Collection() {
   const location = useLocation();
   const data = location.state || {};
+  const dispatch = useDispatch();
+  const [nftData, setNftData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchNFTs() {
+      if (!data.nfts || !Array.isArray(data.nfts) || data.nfts.length === 0) {
+        setNftData([]);
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch all NFT data by name in parallel
+        const results = await Promise.all(
+          data.nfts.map(async (name) => {
+            const res = await dispatch(fetchDataByName(name));
+            const url = `https://${res.payload}`;
+            if (url) {
+              const metaRes = await fetch(url);
+              const meta = await metaRes.json();
+              return meta;
+            }
+            return null;
+          })
+        );
+        setNftData(results.filter(Boolean));
+      } catch (error) {
+        setError('Failed to fetch NFTs');
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchNFTs();
+  }, [data.nfts, dispatch]);
 
     return (
         <div className="">
@@ -33,7 +72,7 @@ function Collection() {
                         </div>
                         <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
                             <span className="text-text-secondary">Total Items:</span>
-                            <span className="text-primary">{data.totalItems}</span>
+                            <span className="text-primary">{data.items}</span>
                         </div>
                         <div className="flex justify-between py-3 text-lg">
                             <span className="text-text-secondary">Total Volume:</span>
@@ -46,11 +85,19 @@ function Collection() {
                 {/* Right: NFT Cards */}
                 <div className="flex-2 min-w-[350px]">
                     <h2 className="text-2xl font-bold text-text-primary mb-8 mt-2">NFTs in the Collection</h2>
-                    <div className="grid grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-8">
-                        <NFTCard />
-                        <NFTCard />
-                        <NFTCard />
-                    </div>
+                    {loading ? (
+                      <div>Loading NFTs...</div>
+                    ) : error ? (
+                      <div className="text-red-500">{error}</div>
+                    ) : nftData.length === 0 ? (
+                      <div>No NFTs found in this collection.</div>
+                    ) : (
+                      <div className="grid grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-8">
+                        {nftData.map((nft, idx) => (
+                          <NFTCard key={idx} {...nft} />
+                        ))}
+                      </div>
+                    )}
                 </div>
             </div>
             <Footer />

@@ -5,7 +5,8 @@ import {
   uploadImageToIPFS,
   uploadDataToIPFS,
   getDataByCid,
-  listDataByGroup
+  listDataByGroup,
+  listDataByName
 } from './ipfs.js';
 
 const router = express.Router();
@@ -38,5 +39,6 @@ router.post('/upload-image', upload.single('file'), uploadImageToIPFS); // image
 router.post('/upload-data', uploadDataToIPFS); // metadata upload (JSON only)
 router.get('/data/:cid', getDataByCid);
 router.get('/data-group', listDataByGroup);
+router.get('/data-name', listDataByName);
 
 export default router;

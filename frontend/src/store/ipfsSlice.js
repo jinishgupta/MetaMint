@@ -72,6 +72,18 @@ export const fetchDataByGroup = createAsyncThunk(
   }
 );
 
+export const fetchDataByName = createAsyncThunk(
+  "ipfs/fetchDataByName",
+  async (name, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`http://localhost:4000/api/data-name?name=${encodeURIComponent(name)}`);
+      return response.data.nfts;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 const ipfsSlice = createSlice({
   name: "ipfs",
   initialState,
@@ -127,6 +139,19 @@ const ipfsSlice = createSlice({
         state.nfts = action.payload;
       })
       .addCase(fetchDataByGroup.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Fetch NFTs by name
+      .addCase(fetchDataByName.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchDataByName.fulfilled, (state, action) => {
+        state.loading = false;
+        state.nfts = action.payload;
+      })
+      .addCase(fetchDataByName.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

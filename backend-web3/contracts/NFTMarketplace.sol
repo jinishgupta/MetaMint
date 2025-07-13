@@ -20,6 +20,7 @@ contract NFTMarketplace is ERC721URIStorage {
         address payable seller;
         uint256 price;
         bool currentlyListed;
+        string tokenURI;
     }
 
     event TokenListedSuccess (
@@ -27,7 +28,8 @@ contract NFTMarketplace is ERC721URIStorage {
         address owner,
         address seller,
         uint256 price,
-        bool currentlyListed
+        bool currentlyListed,
+        string tokenURI
     );
 
     event TokenBoughtSuccess (
@@ -52,11 +54,6 @@ contract NFTMarketplace is ERC721URIStorage {
         return listPrice;
     }
 
-    function getLatestIdToListedToken() public view returns (ListedToken memory) {
-        uint256 currentTokenId = _tokenIds.current();
-        return idToListedToken[currentTokenId];
-    }
-
     function getListedTokenForId(uint256 tokenId) public view returns (ListedToken memory) {
         return idToListedToken[tokenId];
     }
@@ -66,34 +63,31 @@ contract NFTMarketplace is ERC721URIStorage {
     }
 
     function mintNFT(string memory tokenURI, uint256 price) public payable returns (uint) {
+        require(msg.value == listPrice, "Hopefully sending the correct price");
+        require(price > 0, "Make sure the price isn't negative");
         _tokenIds.increment();
         uint256 newTokenId = _tokenIds.current();
         _safeMint(msg.sender, newTokenId);
         _setTokenURI(newTokenId, tokenURI);
-        listNFT(newTokenId, price);
-        return newTokenId;
-    }
-
-    function listNFT(uint256 tokenId, uint256 price) private {
-        require(msg.value == listPrice, "Hopefully sending the correct price");
-        require(price > 0, "Make sure the price isn't negative");
-
-        idToListedToken[tokenId] = ListedToken(
-            tokenId,
+        idToListedToken[newTokenId] = ListedToken(
+            newTokenId,
             payable(address(this)),
             payable(msg.sender),
             price,
-            true
+            true,
+            tokenURI
         );
 
-        _transfer(msg.sender, address(this), tokenId);
+        _transfer(msg.sender, address(this), newTokenId);
         emit TokenListedSuccess(
-            tokenId,
+            newTokenId,
             address(this),
             msg.sender,
             price,
-            true
+            true,
+            tokenURI
         );
+        return newTokenId;
     }
 
     function getAllNFTs() public view returns (ListedToken[] memory) {

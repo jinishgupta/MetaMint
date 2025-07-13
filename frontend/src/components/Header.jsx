@@ -4,12 +4,47 @@ import mintbitLogo from '../assets/mintbit-brands.svg';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {logoutUser} from '../store/authSlice.js';
+import React, { useState, useEffect } from 'react';
 
 function Header() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const {isAuthenticated} = useSelector((state) => state.auth);
-    
+    const [walletAddress, setWalletAddress] = useState("");
+
+    // On mount, check for wallet in localStorage
+    useEffect(() => {
+      const saved = localStorage.getItem('walletAddress');
+      if (saved) setWalletAddress(saved);
+      // Listen for account changes
+      if (window.ethereum) {
+        window.ethereum.on('accountsChanged', (accounts) => {
+          if (accounts.length > 0) {
+            setWalletAddress(accounts[0]);
+            localStorage.setItem('walletAddress', accounts[0]);
+          } else {
+            setWalletAddress("");
+            localStorage.removeItem('walletAddress');
+          }
+        });
+      }
+    }, []);
+
+    // Connect wallet function
+    const connectWallet = async () => {
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          setWalletAddress(accounts[0]);
+          localStorage.setItem('walletAddress', accounts[0]);
+        } catch (err) {
+          alert('Wallet connection failed!');
+        }
+      } else {
+        alert('Please install MetaMask!');
+      }
+    };
+
     const handleLogOut = () => {
         dispatch(logoutUser());
         navigate('/login');
@@ -75,8 +110,13 @@ function Header() {
                     </p>}
                     
                     {/* Wallet Button */}
-                    <button className="bg-gradient-to-r from-green-400 to-blue-800 text-background border-none px-5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-300 uppercase tracking-wider shadow-md h-10 flex items-center hover:border-green-400 hover:text-background hover:-translate-y-0.5 hover:shadow-lg">
-                        Connect Wallet
+                    <button
+                      className="bg-gradient-to-r from-green-400 to-blue-800 text-background border-none px-5 py-2 rounded-xl font-bold cursor-pointer transition-all duration-300 uppercase tracking-wider shadow-md h-10 flex items-center hover:border-green-400 hover:text-background hover:-translate-y-0.5 hover:shadow-lg"
+                      onClick={connectWallet}
+                    >
+                      {walletAddress
+                        ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+                        : 'Connect Wallet'}
                     </button>
 
                     {/* User Icon & Dropdown */}

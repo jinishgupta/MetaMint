@@ -265,12 +265,17 @@ const updateProfile = async (req, res) => {
     if (req.file) {
       // Upload image to Cloudinary
       const uploadResult = await imageUploadUtil("data:image/png;base64," + req.file.buffer.toString('base64'));
-      update.profilePicture = uploadResult.secure_url;
+      if (uploadResult && uploadResult.success && uploadResult.url) {
+        update.profilePicture = uploadResult.url;
+      } else {
+        console.error('Cloudinary upload failed:', uploadResult.error || uploadResult);
+        return res.status(500).json({ success: false, message: 'Image upload failed', error: uploadResult.error });
+      }
     }
     const user = await User.findByIdAndUpdate(req.user._id, update, { new: true }).select('-password');
     res.json({ success: true, user });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 };
 

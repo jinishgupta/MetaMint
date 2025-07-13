@@ -1,11 +1,52 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import Header from '../components/Header';
+import Header from '../components/Header'; 
 import Footer from '../components/Footer';
+import { NFTcontract } from '../contracts';
+import { useState } from 'react';
 
 function NFT() {
   const location = useLocation();
   const data = location.state || {};
+  const [buying, setBuying] = useState(false);
+  const [buyResult, setBuyResult] = useState("");
+
+  const handleBuy = async () => {
+    setBuying(true);
+    setBuyResult("");
+    try {
+      // Check if wallet is connected
+      const walletAddress = localStorage.getItem('walletAddress');
+      if (!window.ethereum || !walletAddress) {
+        setBuyResult("Please connect your wallet first!");
+        setBuying(false);
+        return;
+      }
+
+      // Convert price to wei
+      const priceEth = data.price;
+      let priceWei;
+      try {
+        priceWei = window.ethers ? window.ethers.parseEther(priceEth) : (parseFloat(priceEth) * 1e18).toString();
+      } catch (err) {
+        priceWei = (parseFloat(priceEth) * 1e18).toString();
+      }
+      const tokenId = data.tokenId;
+      if (!tokenId) {
+        setBuyResult("No tokenId provided for this NFT.");
+        setBuying(false);
+        return;
+      }
+      const tx = await NFTcontract.buyNFT(tokenId, { value: priceWei });
+      setBuyResult("Waiting for transaction confirmation...");
+      await tx.wait();
+      setBuyResult("NFT purchased successfully!");
+    } catch (err) {
+      setBuyResult("Purchase failed: " + (err.message || err));
+    } finally {
+      setBuying(false);
+    }
+  };
 
     return (
         <div>
@@ -24,7 +65,7 @@ function NFT() {
                     <div className="bg-[rgba(22,23,27,0.5)] rounded-xl p-8 mb-8">
                         <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
                             <span className="text-text-secondary">Owner:</span>
-                            <span className="text-primary"></span>
+                            <span className="text-primary">{data.owner}</span>
                         </div>
                         <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
                             <span className="text-text-secondary">Category:</span>
@@ -48,7 +89,10 @@ function NFT() {
                             <i className="fa-regular fa-heart text-2xl text-primary" />
                             <i className="fa-solid fa-heart text-2xl text-primary hidden" />
                         </div>
-                        <button className="bg-accent-gradient text-background text-lg font-bold py-3 px-8 rounded-xl shadow-md hover:bg-accent-gradient-hover hover:-translate-y-0.5 hover:shadow-lg hover:shadow-glow transition-all uppercase tracking-wide justify-self-center">Buy Now</button>
+                        <button className="bg-accent-gradient text-background text-lg font-bold py-3 px-8 rounded-xl shadow-md hover:bg-accent-gradient-hover hover:-translate-y-0.5 hover:shadow-lg hover:shadow-glow transition-all uppercase tracking-wide justify-self-center" onClick={handleBuy} disabled={buying}>
+                          {buying ? "Processing..." : "Buy Now"}
+                        </button>
+                        <div className="col-span-3 text-center text-primary mt-2">{buyResult}</div>
                         <div></div>
                     </div>
                 </div>

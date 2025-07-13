@@ -2,15 +2,22 @@ import React, { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { uploadData, uploadImage } from '../store/ipfsSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { NFTcontract } from '../contracts';
 
 function MintNFT() {
     const [collectionType, setCollectionType] = useState('new');
+    const user = useSelector(state => state.auth.user);
     const [collectionData, setCollectionData] = useState({
         category: "",
         name: "",
         description: "",
-        type:"collection"
+        type:"collection",
+        date:"",
+        floor:"",
+        volume:"",
+        items:"1",
+        nfts:[]
     });
     const [nftData, setNftData] = useState({
         name: "",
@@ -18,14 +25,15 @@ function MintNFT() {
         description: "",
         price: "",
         type:"nft",
+        owner: user.userName,
         views: 0,
-        favorites: 0
+        favorites: 0,
     })
     const [nftImage, setNftImage] = useState(null);
     const [minting, setMinting] = useState(false);
     const [mintResult, setMintResult] = useState("");
     const dispatch = useDispatch();
-
+    const GATEWAY_URL = 'white-generous-iguana-225.mypinata.cloud';
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         setNftImage(file);
@@ -52,7 +60,7 @@ function MintNFT() {
         setMintResult("");
 
         // Basic validation
-        if (!nftData["name"] || !nftImage) {
+        if (!nftData["name"] || !nftImage) {group
             setMintResult("NFT name and image are required.");
             return;
         }
@@ -62,18 +70,37 @@ function MintNFT() {
         }
 
         setMinting(true);
-        setMintResult("Uploading image to IPFS...");
+        setMintResult("Getting current token ID...");
         try {
+            // Check if wallet is connected
+            const walletAddress = localStorage.getItem('walletAddress');
+            if (!window.ethereum || !walletAddress) {
+                setMintResult("Please connect your wallet first!");
+                setMinting(false);
+                return;
+            }
+
+            // Get the current token ID before minting
+            const currentTokenId = await NFTcontract.getCurrentToken();
+            const nextTokenId = currentTokenId + 1n; // The next token ID that will be assigned (BigInt)
+            
+            setMintResult("Uploading image to IPFS...");
             // 1. Upload image and wait for result
             const imageResult = await dispatch(uploadImage(nftImage)).unwrap();
             if (!imageResult.success) {
                 setMintResult("Image upload failed: " + (imageResult.message || "Unknown error"));
                 return;
             }
-            // 2. Add imageUrl to metadata
+            // 2. Upload collection metadata
             const imageUrl = imageResult.imageUrl;
             let metaToUpload;
             if (collectionType === "new") {
+                collectionData["floor"] = nftData["price"];
+                collectionData["volume"] = nftData["price"];
+                collectionData["nfts"].push(nftData["name"]);
+                const now = new Date();
+                const options = { day: '2-digit', month: 'long', year: 'numeric' };
+                collectionData["date"] = now.toLocaleDateString('en-GB', options);
                 metaToUpload = { ...collectionData, imageUrl: imageUrl };
                 setMintResult("Uploading collection metadata to IPFS...");
                 const collectionResult = await dispatch(uploadData(metaToUpload)).unwrap();
@@ -84,12 +111,47 @@ function MintNFT() {
                 }
             } else {
             }
-            // 3. Upload metadata
-            metaToUpload = { ...nftData, imageUrl: imageUrl };
-            const nftResult = await dispatch(uploadData(metaToUpload)).unwrap();
+            // 3. Upload NFT metadata with tokenId
+            const nftDataWithTokenId = { 
+                ...nftData, 
+                imageUrl: imageUrl,
+                tokenId: nextTokenId.toString() // Store the tokenId in the metadata as string
+            };
+            const nftResult = await dispatch(uploadData(nftDataWithTokenId)).unwrap();
+            console.log(nftResult);
             setMintResult("Uploading NFT metadata to IPFS...");
             if (nftResult.success) {
-                setMintResult("NFT Minted successfully!" );
+                // Call smart contract mintNFT
+                const tokenURI = nftResult.metadataUrl;
+                if (!tokenURI) {
+                  setMintResult("NFT metadata upload succeeded but no CID returned.");
+                  return;
+                }
+                setMintResult("Minting NFT on blockchain...");
+                // Convert price to wei (ethers.js v6+)
+                const priceEth = nftData.price;
+                let priceWei;
+                try {
+                  priceWei = window.ethers ? window.ethers.parseEther(priceEth) : (parseFloat(priceEth) * 1e18).toString();
+                } catch (err) {
+                  priceWei = (parseFloat(priceEth) * 1e18).toString();
+                }
+                // Get list price from contract
+                let listPrice = "0";
+                try {
+                  listPrice = (await NFTcontract.getListPrice()).toString();
+                } catch (err) {
+                  // fallback to 0
+                }
+                try {
+                  const tx = await NFTcontract.mintNFT(tokenURI, priceWei, { value: listPrice });
+                  setMintResult("Waiting for transaction confirmation...");
+                  await tx.wait();
+                  setMintResult("NFT Minted successfully on blockchain!");
+                } catch (err) {
+                  setMintResult("Blockchain mint failed: " + (err.message || err));
+                  return;
+                }
             } else {
                 setMintResult(nftResult.message || "NFT Metadata upload failed");
             }
