@@ -79,19 +79,40 @@ function Header() {
 
                 {/* Search Section */}
                 <div className="flex-1 flex items-center justify-center max-w-[400px] mx-6 h-12">
-                    <input 
-                        placeholder="Search NFTs..."
-                        className="w-full px-4 py-2 bg-surface-light border-2 border-border rounded-lg text-text-primary text-base transition-all duration-300 h-10 flex items-center placeholder-text-muted font-normal focus:outline-none focus:border-green-400 focus:shadow-[0_0_0_4px_rgba(0,220,130,0.15)] focus:scale-102"
-                    />
+                   <form
+                     className="w-full"
+                     onSubmit={e => {
+                       e.preventDefault();
+                       const value = e.target.elements.searchInput.value.trim();
+                       if (value) {
+                         navigate(`/search-and-sort?query=${encodeURIComponent(value)}`);
+                       } else {
+                         navigate('/search-and-sort');
+                       }
+                     }}
+                   >
+                        <input 
+                         name="searchInput"
+                         placeholder="Search NFTs..."
+                         className="w-full px-4 py-2 bg-surface-light border-2 border-border rounded-lg text-text-primary text-base transition-all duration-300 h-10 flex items-center placeholder-text-muted font-normal focus:outline-none focus:border-green-400 focus:shadow-[0_0_0_4px_rgba(0,220,130,0.15)] focus:scale-102"
+                         autoComplete="off"
+                       />
+                   </form>
                 </div>
 
                 {/* Navigation Items */}
                 <div className="flex items-center gap-5 h-12">
-                    <p className="text-gray-500 font-semibold px-4 py-2 rounded-lg transition-all flex items-center h-10 hover:text-green-400 hover:bg-white/10 hover:-translate-y-0.5 relative group" onClick={() => navigate('/search-and-sort')}>
+                    <p
+                        className="text-gray-500 font-semibold px-4 py-2 rounded-lg transition-all flex items-center h-10 hover:text-green-400 hover:bg-white/10 hover:-translate-y-0.5 relative group"
+                        onClick={() => navigate('/search-and-sort/#nft')}
+                    >
                         NFTs
                         <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-green-400 to-blue-800 transition-all duration-300 transform -translate-x-1/2 group-hover:w-4/5 rounded"></span>
                     </p>
-                    <p className="text-gray-500 font-semibold px-4 py-2 rounded-lg transition-all flex items-center h-10 hover:text-green-400 hover:bg-white/10 hover:-translate-y-0.5 relative group" onClick={() => navigate('/search-and-sort')}>
+                    <p
+                        className="text-gray-500 font-semibold px-4 py-2 rounded-lg transition-all flex items-center h-10 hover:text-green-400 hover:bg-white/10 hover:-translate-y-0.5 relative group"
+                        onClick={() => navigate('/search-and-sort/#collection')}
+                    >
                         Collections
                         <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-green-400 to-blue-800 transition-all duration-300 transform -translate-x-1/2 group-hover:w-4/5 rounded"></span>
                     </p>
@@ -128,7 +149,8 @@ function Header() {
                         <div className="hidden group-hover:block absolute right-0 top-[calc(100%+0.75rem)] min-w-[200px] bg-surface backdrop-blur-[20px] border border-[rgba(255,255,255,0.1)] rounded-lg shadow-xl overflow-hidden animate-slideDown z-[1001]">
                             <div className="py-1">
                                 <p onClick={() => navigate('/mint-nft')} className="text-text-primary px-5 py-3.5 block text-sm font-medium transition-all duration-300 border-l-3 border-transparent hover:bg-green-400 hover:text-background hover:border-l-background hover:pl-6">Mint NFTs</p>
-                                <p onClick={() => navigate('/auction')} className="text-text-primary px-5 py-3.5 block text-sm font-medium transition-all duration-300 border-l-3 border-transparent hover:bg-green-400 hover:text-background hover:border-l-background hover:pl-6">Auctions</p>
+                                <p onClick={() => navigate('/start')} className="text-text-primary px-5 py-3.5 block text-sm font-medium transition-all duration-300 border-l-3 border-transparent hover:bg-green-400 hover:text-background hover:border-l-background hover:pl-6">Start Auction</p>
+                                <p onClick={() => navigate('/search-and-sort/#auctions')} className="text-text-primary px-5 py-3.5 block text-sm font-medium transition-all duration-300 border-l-3 border-transparent hover:bg-green-400 hover:text-background hover:border-l-background hover:pl-6">Auctions</p>
                                 <p onClick={() => navigate('/learn')} className="text-text-primary px-5 py-3.5 block text-sm font-medium transition-all duration-300 border-l-3 border-transparent hover:bg-green-400 hover:text-background hover:border-l-background hover:pl-6">Learn</p>
                                 <p className="text-text-primary px-5 py-3.5 block text-sm font-medium transition-all duration-300 border-l-3 border-transparent hover:bg-green-400 hover:text-background hover:border-l-background hover:pl-6">Support</p>
                             </div>

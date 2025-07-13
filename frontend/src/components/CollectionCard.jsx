@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 
-function CollectionCard({ imageUrl, name, floor, volume, description, ...rest }) {
+function CollectionCard({ imageUrl, name, floor, volume, description, id, ...rest }) {
   const navigate = useNavigate();
   const handleClick = () => {
-    navigate('/collection', { state: { imageUrl, name, floor, volume, description, ...rest } });
+    navigate('/collection', { state: { imageUrl, name, floor, volume, description, id, ...rest } });
   };
   return (
     <div

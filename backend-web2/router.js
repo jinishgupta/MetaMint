@@ -6,7 +6,8 @@ import {
   uploadDataToIPFS,
   getDataByCid,
   listDataByGroup,
-  listDataByName
+  listDataByName,
+  updateOnPinata
 } from './ipfs.js';
 
 const router = express.Router();
@@ -40,5 +41,6 @@ router.post('/upload-data', uploadDataToIPFS); // metadata upload (JSON only)
 router.get('/data/:cid', getDataByCid);
 router.get('/data-group', listDataByGroup);
 router.get('/data-name', listDataByName);
+router.post('/update-pinata', updateOnPinata);
 
 export default router;

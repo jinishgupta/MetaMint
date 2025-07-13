@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 
-function NFTCard({ imageUrl, name, owner, price, description, ...rest }) {
+function NFTCard({ imageUrl, name, owner, price, description, id, ...rest }) {
     const navigate = useNavigate();
     const handleClick = () => {
-        navigate('/nft', { state: { imageUrl, name, owner, price, description, ...rest } });
+        navigate('/nft', { state: { imageUrl, name, owner, price, description, id, ...rest } });
     };
     return (
         <div

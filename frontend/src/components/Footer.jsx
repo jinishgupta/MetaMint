@@ -1,8 +1,10 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import mintbitLogo from '../assets/mintbit-brands.svg';
 import { faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
 
 function Footer() {
+  const navigate = useNavigate();
     return (
         <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-12 py-16 px-8 mt-20 bg-[rgba(22,23,27,0.8)] backdrop-blur-[30px] border-t-2 border-[var(--glass-border)] relative z-10 group">
             {/* Gradient border effect on hover */}
@@ -29,11 +31,10 @@ function Footer() {
                 </div>
                 <ul className="list-none p-0 m-0">
                     <li className="mb-3"><strong>Categories:</strong></li>
-                    <li className="mb-3 text-[var(--text-secondary)] no-underline text-[0.95rem] font-medium transition-all duration-300 py-1 inline-block hover:text-[var(--primary)] hover:translate-x-2">Art</li><br />
-                    <li className="mb-3 text-[var(--text-secondary)] no-underline text-[0.95rem] font-medium transition-all duration-300 py-1 inline-block hover:text-[var(--primary)] hover:translate-x-2">Gaming</li><br />
-                    <li className="mb-3 text-[var(--text-secondary)] no-underline text-[0.95rem] font-medium transition-all duration-300 py-1 inline-block hover:text-[var(--primary)] hover:translate-x-2">PFPs</li><br />
-                    <li className="mb-3 text-[var(--text-secondary)] no-underline text-[0.95rem] font-medium transition-all duration-300 py-1 inline-block hover:text-[var(--primary)] hover:translate-x-2">Photography</li><br />
-                    <li className="mb-3 text-[var(--text-secondary)] no-underline text-[0.95rem] font-medium transition-all duration-300 py-1 inline-block hover:text-[var(--primary)] hover:translate-x-2">Music</li><br />
+                    <li className="mb-3 text-[var(--text-secondary)] no-underline text-[0.95rem] font-medium transition-all duration-300 py-1 inline-block hover:text-[var(--primary)] hover:translate-x-2" onClick={() => navigate('/#art')}>Art</li><br />
+                    <li className="mb-3 text-[var(--text-secondary)] no-underline text-[0.95rem] font-medium transition-all duration-300 py-1 inline-block hover:text-[var(--primary)] hover:translate-x-2" onClick={() => navigate('/#gaming')}>Gaming</li><br />
+                    <li className="mb-3 text-[var(--text-secondary)] no-underline text-[0.95rem] font-medium transition-all duration-300 py-1 inline-block hover:text-[var(--primary)] hover:translate-x-2" onClick={() => navigate('/#pfp')}>PFPs</li><br />
+                    <li className="mb-3 text-[var(--text-secondary)] no-underline text-[0.95rem] font-medium transition-all duration-300 py-1 inline-block hover:text-[var(--primary)] hover:translate-x-2" onClick={() => navigate('/#photography')}>Photography</li><br />
                 </ul>
             </div>
 

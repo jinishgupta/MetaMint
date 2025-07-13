@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import { uploadData, uploadImage } from '../store/ipfsSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { NFTcontract } from '../contracts';
+import { fetchDataByName } from '../store/ipfsSlice';
 
 function MintNFT() {
     const [collectionType, setCollectionType] = useState('new');
@@ -17,6 +18,7 @@ function MintNFT() {
         floor:"",
         volume:"",
         items:"1",
+        id:"",
         nfts:[]
     });
     const [nftData, setNftData] = useState({
@@ -28,6 +30,7 @@ function MintNFT() {
         owner: user.userName,
         views: 0,
         favorites: 0,
+        id:""
     })
     const [nftImage, setNftImage] = useState(null);
     const [minting, setMinting] = useState(false);
@@ -91,7 +94,7 @@ function MintNFT() {
                 setMintResult("Image upload failed: " + (imageResult.message || "Unknown error"));
                 return;
             }
-            // 2. Upload collection metadata
+            // 2. Upload collection metadata or update existing collection
             const imageUrl = imageResult.imageUrl;
             let metaToUpload;
             if (collectionType === "new") {
@@ -109,7 +112,55 @@ function MintNFT() {
                 } else {
                     setMintResult(collectionResult.message || "Collection Metadata upload failed");
                 }
-            } else {
+            } else if (collectionType === "existing") {
+                setMintResult("Fetching existing collection...");
+                // 1. Find collection by name
+                const collectionName = document.getElementById("existingCollection-id").value.trim();
+                if (!collectionName) {
+                  setMintResult("Please enter the existing collection name.");
+                  setMinting(false);
+                  return;
+                }
+                // Fetch collection metadata URL(s) and id(s)
+                const res = await dispatch(fetchDataByName(collectionName));
+                const files = res.payload;
+                if (!files || files.length === 0) {
+                  setMintResult("Collection not found.");
+                  setMinting(false);
+                  return;
+                }
+                // Use the first result (assume unique name)
+                const file = files[0];
+                const url = file.url;
+                const id = file.id;
+                const resp = await fetch(url);
+                const collectionMeta = await resp.json();
+                // 2. Update collection fields
+                const newPrice = parseFloat(nftData.price);
+                const oldFloor = parseFloat(collectionMeta.floor) || newPrice;
+                const oldVolume = parseFloat(collectionMeta.volume) || 0;
+                const oldItems = parseInt(collectionMeta.items) || 0;
+                const nfts = Array.isArray(collectionMeta.nfts) ? [...collectionMeta.nfts] : [];
+                nfts.push(nftData.name);
+                const updatedCollection = {
+                  ...collectionMeta,
+                  floor: oldFloor > newPrice ? newPrice : oldFloor,
+                  volume: (oldVolume + newPrice).toString(),
+                  items: (oldItems + 1).toString(),
+                  nfts,
+                };
+                // 3. Update on Pinata
+                setMintResult("Updating collection metadata on Pinata...");
+                const updateRes = await fetch('http://localhost:4000/api/update-pinata', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ id, updatedData: updatedCollection }),
+                }).then(r => r.json());
+                if (!updateRes.success) {
+                  setMintResult('Failed to update collection: ' + (updateRes.message || 'Unknown error'));
+                  setMinting(false);
+                  return;
+                }
             }
             // 3. Upload NFT metadata with tokenId
             const nftDataWithTokenId = { 
@@ -118,8 +169,6 @@ function MintNFT() {
                 tokenId: nextTokenId.toString() // Store the tokenId in the metadata as string
             };
             const nftResult = await dispatch(uploadData(nftDataWithTokenId)).unwrap();
-            console.log(nftResult);
-            setMintResult("Uploading NFT metadata to IPFS...");
             if (nftResult.success) {
                 // Call smart contract mintNFT
                 const tokenURI = nftResult.metadataUrl;

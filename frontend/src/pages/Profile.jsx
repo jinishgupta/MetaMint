@@ -4,6 +4,7 @@ import Header from "../components/Header";
 import { fetchProfile, updateProfile, changePassword } from "../store/authSlice";
 import { NFTcontract } from "../contracts";
 import NFTCard from "../components/NFTCard";
+import { fetchDataByName } from '../store/ipfsSlice';
 
 function Profile() {
   const dispatch = useDispatch();
@@ -20,6 +21,8 @@ function Profile() {
   const [ownedLoading, setOwnedLoading] = useState(false);
   const [ownedError, setOwnedError] = useState(null);
   const [walletAddress, setWalletAddress] = useState("");
+  const [favoritedNfts, setFavoritedNfts] = useState([]);
+  const [favoritedNftData, setFavoritedNftData] = useState([]);
 
   useEffect(() => {
     dispatch(fetchProfile());
@@ -35,6 +38,42 @@ function Profile() {
   useEffect(() => {
     const saved = localStorage.getItem('walletAddress');
     if (saved) setWalletAddress(saved);
+  }, []);
+
+  // Fetch favorited NFTs on mount
+  useEffect(() => {
+    const favs = JSON.parse(localStorage.getItem('favoritedNfts') || '[]');
+    setFavoritedNfts(favs);
+    const fetchFavs = async () => {
+      if (!favs.length) {
+        setFavoritedNftData([]);
+        return;
+      }
+      try {
+        const results = await Promise.all(
+          favs.map(async (name) => {
+            const res = await dispatch(fetchDataByName(name));
+            const files = res.payload;
+            if (Array.isArray(files) && files.length > 0) {
+              const file = files[0];
+              if (file && file.url) {
+                const metaRes = await fetch(file.url);
+                const meta = await metaRes.json();
+                meta.id = file.id;
+                meta.cid = file.cid;
+                return meta;
+              }
+            }
+            return null;
+          })
+        );
+        setFavoritedNftData(results.filter(Boolean));
+      } catch (err) {
+        setFavoritedNftData([]);
+      }
+    };
+    fetchFavs();
+    // eslint-disable-next-line
   }, []);
 
   const ownedNFTs = async () => {
@@ -295,8 +334,16 @@ function Profile() {
             </div>
           )}
           {activeTab === 'favorites' && (
-            <div className="w-full bg-[rgba(22,23,27,0.8)] backdrop-blur-[30px] border border-gray-600 rounded-2xl p-10 shadow-xl mb-8 min-h-[300px] flex items-center justify-center">
-              <div className="text-center text-gray-400 text-lg">Favorite NFTs will be displayed here.</div>
+            <div className="w-full bg-[rgba(22,23,27,0.8)] backdrop-blur-[30px] border border-gray-600 rounded-2xl p-10 shadow-xl mb-8 min-h-[300px] flex flex-col items-center justify-center">
+              {favoritedNftData.length === 0 ? (
+                <div className="text-center text-gray-400 text-lg">No favorited NFTs found.</div>
+              ) : (
+                <div className="grid grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-8 w-full">
+                  {favoritedNftData.map((nft, idx) => (
+                    <NFTCard key={idx} {...nft} />
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

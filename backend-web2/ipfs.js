@@ -21,11 +21,11 @@ const uploadImageToIPFS = async (req, res) => {
     const imageResult = await imageUpload;
     console.log("Image Result: ", imageResult);
     res.json({
-      success: true,
+    success: true,
       imageCid: imageResult.cid,
       imageUrl: `${process.env.GATEWAY_URL}/ipfs/${imageResult.cid}`
     });
-  } catch (error) {
+} catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -102,7 +102,8 @@ const uploadDataToIPFS = async (req, res) => {
     res.json({
       success: true,
       metadataCid: metadataResult.cid,
-      metadataUrl: `${process.env.GATEWAY_URL}/ipfs/${metadataResult.cid}`
+      metadataUrl: `${process.env.GATEWAY_URL}/ipfs/${metadataResult.cid}`,
+      id: metadataResult.id
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -127,12 +128,13 @@ const listDataByGroup = async (req, res) => {
     const filesResult = await pinata.files.public.list().group(group);
     // filesResult is an object: { files: [...], next_page_token: ... }
     const fileArray = Array.isArray(filesResult.files) ? filesResult.files : [];
-    const urls = fileArray.map(file => {
+    const nfts = fileArray.map(file => {
       const cid = file.cid;
-      if (!cid) return null;
-      return `${process.env.GATEWAY_URL}/ipfs/${cid}`;
+      const id = file.id;
+      if (!cid || !id) return null;
+      return { url: `https://${process.env.GATEWAY_URL}/ipfs/${cid}`, id, cid };
     }).filter(Boolean);
-    res.json({ success: true, nfts: urls });
+    res.json({ success: true, nfts });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -143,21 +145,41 @@ const listDataByName = async (req,res) => {
     const {name} = req.query;
     const fileResult = await pinata.files.public.list().name(name);
     const fileArray = Array.isArray(fileResult.files) ? fileResult.files : [];
-    const urls = fileArray.map(file => {
+    const nfts = fileArray.map(file => {
       const cid = file.cid;
-      if (!cid) return null;
-      return `${process.env.GATEWAY_URL}/ipfs/${cid}`;
+      const id = file.id;
+      if (!cid || !id) return null;
+      return { url: `https://${process.env.GATEWAY_URL}/ipfs/${cid}`, id, cid };
     }).filter(Boolean);
-    res.json({ success: true, nfts: urls });
+    res.json({ success: true, nfts });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 }
+
+// General update function for Pinata
+const updateOnPinata = async (req, res) => {
+  try {
+    const { id, updatedData } = req.body; // id = file id or CID, updatedData = new JSON
+    if (!id || !updatedData) {
+      return res.status(400).json({ success: false, message: 'Missing id or updatedData' });
+    }
+    // https://docs.pinata.cloud/sdk/files/public/update
+    const updateResult = await pinata.update.public.json(id, updatedData);
+    res.json({
+    success: true,
+      updateResult
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 export {
   uploadImageToIPFS,
   uploadDataToIPFS,
   getDataByCid,
   listDataByGroup,
-  listDataByName
+  listDataByName,
+  updateOnPinata
 };

@@ -8,7 +8,8 @@ import Learn from './pages/Learn.jsx';
 import SearchAndSort from './pages/SearchAndSort.jsx';
 import Collection from './pages/CollectionPage.jsx';
 import NFT from './pages/NFTPage.jsx';
-import Auction from './pages/Auction.jsx';
+import AuctionPage from './pages/AuctionPage.jsx';
+import StartAuction from './pages/StartAuction.jsx'
 import CheckAuth from './components/check-auth.jsx';
 import { checkAuth } from './store/authSlice.js';
 import { useDispatch, useSelector } from 'react-redux';
@@ -52,7 +53,12 @@ function App() {
         } />
         <Route path="/auction" element={
           <CheckAuth isAuthenticated={isAuthenticated} >
-            <Auction />
+            <AuctionPage />
+          </CheckAuth>
+        } />
+        <Route path="/start" element={
+          <CheckAuth isAuthenticated={isAuthenticated} >
+            <StartAuction />
           </CheckAuth>
         } />
         <Route path="/search-and-sort" element={

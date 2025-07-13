@@ -81,24 +81,30 @@ function HomePage() {
             const fetchCollection = dispatch(fetchDataByGroup(collectionIdObj.value)).unwrap();
             const [nftRes, collectionRes] = await Promise.all([fetchNft, fetchCollection]);
             const nftMeta = await Promise.all(
-              (nftRes || []).map(async (url) => {
+              (nftRes || []).map(async (file) => {
                 try {
-                  const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-                  const resp = await fetch(fullUrl);
+                  if (!file || !file.url || !file.id) return null;
+                  const resp = await fetch(file.url);
                   if (!resp.ok) throw new Error('Failed to fetch NFT metadata');
-                  return await resp.json();
+                  const meta = await resp.json();
+                  meta.id = file.id;
+                  meta.cid = file.cid;
+                  return meta;
                 } catch (err) {
                   return null;
                 }
               })
             );
             const collectionMeta = await Promise.all(
-              (collectionRes || []).map(async (url) => {
+              (collectionRes || []).map(async (file) => {
                 try {
-                  const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-                  const resp = await fetch(fullUrl);
+                  if (!file || !file.url || !file.id) return null;
+                  const resp = await fetch(file.url);
                   if (!resp.ok) throw new Error('Failed to fetch Collection metadata');
-                  return await resp.json();
+                  const meta = await resp.json();
+                  meta.id = file.id;
+                  meta.cid = file.cid;
+                  return meta;
                 } catch (err) {
                   return null;
                 }
@@ -125,14 +131,17 @@ function HomePage() {
           const [artNfts, gamingNfts, pfpNfts, photoNfts] = nftResults;
           const [artCollections, gamingCollections, pfpCollections, photoCollections] = collectionResults;
           // Parse all NFTs
-          const parseNfts = async (urls) => {
+          const parseNfts = async (files) => {
             return await Promise.all(
-              (urls || []).map(async (url) => {
+              (files || []).map(async (file) => {
                 try {
-                  const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-                  const resp = await fetch(fullUrl);
+                  if (!file || !file.url || !file.id) return null;
+                  const resp = await fetch(file.url);
                   if (!resp.ok) throw new Error('Failed to fetch NFT metadata');
-                  return await resp.json();
+                  const meta = await resp.json();
+                  meta.id = file.id;
+                  meta.cid = file.cid;
+                  return meta;
                 } catch (err) {
                   return null;
                 }
@@ -140,14 +149,17 @@ function HomePage() {
             );
           };
           // Parse all collections
-          const parseCollections = async (urls) => {
+          const parseCollections = async (files) => {
             return await Promise.all(
-              (urls || []).map(async (url) => {
+              (files || []).map(async (file) => {
                 try {
-                  const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-                  const resp = await fetch(fullUrl);
+                  if (!file || !file.url || !file.id) return null;
+                  const resp = await fetch(file.url);
                   if (!resp.ok) throw new Error('Failed to fetch Collection metadata');
-                  return await resp.json();
+                  const meta = await resp.json();
+                  meta.id = file.id;
+                  meta.cid = file.cid;
+                  return meta;
                 } catch (err) {
                   return null;
                 }

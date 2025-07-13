@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 function Collection() {
   const location = useLocation();
   const data = location.state || {};
+  // data.id is now available for updates
   const dispatch = useDispatch();
   const [nftData, setNftData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -27,11 +28,17 @@ function Collection() {
         const results = await Promise.all(
           data.nfts.map(async (name) => {
             const res = await dispatch(fetchDataByName(name));
-            const url = `https://${res.payload}`;
-            if (url) {
-              const metaRes = await fetch(url);
-              const meta = await metaRes.json();
-              return meta;
+            const files = res.payload;
+            if (Array.isArray(files) && files.length > 0) {
+              // Use the first file (or loop if you want all)
+              const file = files[0];
+              if (file && file.url) {
+                const metaRes = await fetch(file.url);
+                const meta = await metaRes.json();
+                meta.id = file.id;
+                meta.cid = file.cid;
+                return meta;
+              }
             }
             return null;
           })
