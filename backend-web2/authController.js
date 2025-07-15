@@ -34,6 +34,7 @@ const sendVerificationEmail = (email, token) => {
 
 //register
 const registerUser = async (req, res) => {
+    console.log('[REGISTER] Incoming request:', req.body);
     const { userName, email, password } = req.body;
 
     
@@ -61,6 +62,7 @@ const registerUser = async (req, res) => {
     try {
         const checkUser = await User.findOne({ email });
         if(checkUser) {
+            console.log('[REGISTER] User already exists:', email);
             return res.status(400).json({
                 success: false,
                 message: "User already exists with same email"
@@ -69,12 +71,14 @@ const registerUser = async (req, res) => {
         const hashPassword = await bcrypt.hash(password,12);
         const token = jwt.sign({ userName, email, password: hashPassword }, 'CLIENT_SECRET_KEY', { expiresIn: '15m' });
         sendVerificationEmail(email, token);
+        console.log('[REGISTER] Verification email sent to:', email);
         res.status(200).json({
             success: true,
             message: "Verification email sent. Check your inbox to complete signup."
         });
     } catch(e) {
         const errorMessage = e.message || "Some error occurred";
+        console.error('[REGISTER] Error:', errorMessage);
         res.status(500).json({
             success: false,
             message: errorMessage
@@ -102,6 +106,7 @@ const verifyEmail = async (req, res) => {
 //login
 
 const loginUser = async (req, res) => {
+    console.log('[LOGIN] Incoming request:', req.body);
     const { email, password } = req.body;
 
     // Sanitize input
@@ -115,6 +120,7 @@ const loginUser = async (req, res) => {
     try{
         const user = await User.findOne({ email });
         if(!user) {
+            console.log('[LOGIN] User not found:', email);
             return res.status(400).json({
                 success: false,
                 message: "User does not exist with this email"
@@ -122,6 +128,7 @@ const loginUser = async (req, res) => {
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if(!isPasswordValid) {
+            console.log('[LOGIN] Invalid password for:', email);
             return res.status(400).json({
                 success: false,
                 message: "Invalid password"
@@ -142,8 +149,9 @@ const loginUser = async (req, res) => {
                 userName: user.userName
             }
         });
-
+        console.log('[LOGIN] Login successful for:', email);
     } catch(e) {
+        console.error('[LOGIN] Error:', e.message);
         res.status(500).json({
             success: false,
             message:"Some error occured"
@@ -154,6 +162,7 @@ const loginUser = async (req, res) => {
 //logout
 
 const logoutUser = async (req, res) => {
+    console.log('[LOGOUT] Incoming request. Cookies:', req.cookies);
     try {
         res.clearCookie('token', {
             httpOnly: true,
@@ -163,7 +172,9 @@ const logoutUser = async (req, res) => {
             success: true,
             message: "Logout successful"
         });
+        console.log('[LOGOUT] Logout successful.');
     } catch (e) {
+        console.error('[LOGOUT] Error:', e.message);
         res.status(500).json({
             success: false,
             message: "Some error occurred"
@@ -231,8 +242,10 @@ const googleLogin = async (req, res) => {
 //middleware
 
 const authMiddleware = async (req, res, next) => {
+    console.log('[AUTH_MIDDLEWARE] Cookies:', req.cookies);
     const token = req.cookies.token;
     if (!token) {
+        console.log('[AUTH_MIDDLEWARE] No token found. Unauthorized.');
         return res.status(401).json({
             success: false,
             message: "Unauthorized user!"
@@ -241,8 +254,10 @@ const authMiddleware = async (req, res, next) => {
     try {
         const decoded = jwt.verify(token, 'CLIENT_SECRET_KEY');
         req.user = await User.findById(decoded.id).select('-password');
+        console.log('[AUTH_MIDDLEWARE] Authenticated user:', req.user?.email);
         next();
     } catch (e) {
+        console.log('[AUTH_MIDDLEWARE] Invalid token.');
         return res.status(401).json({
             success: false,
             message: "Unauthorized user!"
