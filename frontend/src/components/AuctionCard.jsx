@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { NFTcontract } from '../contracts';
+import { NFTcontract } from '../contracts/contracts';
 
 function AuctionCard({ imageUrl, name, endTime, auctionId, ...rest }) {
   const navigate = useNavigate();

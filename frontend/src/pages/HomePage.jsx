@@ -199,8 +199,8 @@ function HomePage() {
   }, [selected, dispatch]);
 
   return (
-      <div>
-        <Header />
+    <div>
+      <Header />
         <div className="px-8 pt-8 pb-2">
           <h2 className="text-2xl md:text-3xl font-black text-white mb-1">Discover Unique Digital Art</h2>
           <p className="text-gray-300 text-base mb-6">Explore the world's finest NFT collections and connect with artists worldwide</p>
@@ -303,8 +303,8 @@ function HomePage() {
             )}
           />
         )}
-        <Footer />
-      </div>
+      <Footer />
+    </div>
   );
 }
 

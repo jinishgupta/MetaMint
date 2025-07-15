@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Header from "../components/Header";
 import { fetchProfile, updateProfile, changePassword } from "../store/authSlice";
-import { NFTcontract } from "../contracts";
+import { NFTcontract } from "../contracts/contracts";
 import NFTCard from "../components/NFTCard";
 import { fetchDataByName } from '../store/ipfsSlice';
 

@@ -2,7 +2,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { NFTcontract } from '../contracts';
+import { NFTcontract } from '../contracts/contracts';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { fetchDataByName } from '../store/ipfsSlice';

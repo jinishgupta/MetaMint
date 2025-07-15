@@ -13,7 +13,7 @@ function CollectionCard({ imageUrl, name, floor, volume, description, id, ...res
       <div className="w-full h-[320px] flex items-center justify-center overflow-hidden rounded-t-2xl p-2">
         <img
             src={`https://${imageUrl}`}
-            alt="Collection"
+          alt="Collection"
           className="w-full h-[300px] object-cover rounded-t-2xl"
         />
       </div>

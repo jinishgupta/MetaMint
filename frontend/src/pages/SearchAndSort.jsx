@@ -2,7 +2,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { NFTcontract } from '../contracts';
+import { NFTcontract } from '../contracts/contracts.js';
 import NFTCard from '../components/NFTCard';
 import CollectionCard from '../components/CollectionCard';
 import AuctionCard from '../components/AuctionCard';

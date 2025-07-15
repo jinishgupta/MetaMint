@@ -3,7 +3,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { uploadData, uploadImage } from '../store/ipfsSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { NFTcontract } from '../contracts';
+import { NFTcontract } from '../contracts/contracts';
 import { fetchDataByName } from '../store/ipfsSlice';
 import { useNavigate } from 'react-router-dom';
 
@@ -159,7 +159,7 @@ function MintNFT() {
                 };
                 // 3. Update on Pinata
                 setMintResult("Updating collection metadata on Pinata...");
-                const updateRes = await fetch('http://localhost:4000/api/update-pinata', {
+                const updateRes = await fetch('https://metamint.onrender.com/api/update-pinata', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                  body: JSON.stringify({ id, updatedData: updatedCollection }),
@@ -275,37 +275,37 @@ function MintNFT() {
 
                 {/* New Collection Section */}
                 {collectionType === 'new' && (
-                    <div className="form-group bg-[rgba(22,23,27,0.5)] p-6 rounded-xl border border-border mb-6 transition-all hover:border-primary hover:bg-[rgba(22,23,27,0.7)]">
-                        <h2 className="relative text-[2rem] font-bold bg-accent-gradient bg-clip-text text-transparent mt-8 mb-6 tracking-tight" style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                            New Collection Metadata
-                            <span className="block absolute left-0 bottom-[-8px] w-[60px] h-[3px] bg-accent-gradient rounded" aria-hidden="true"></span>
-                        </h2>
-                        {[
+                <div className="form-group bg-[rgba(22,23,27,0.5)] p-6 rounded-xl border border-border mb-6 transition-all hover:border-primary hover:bg-[rgba(22,23,27,0.7)]">
+                    <h2 className="relative text-[2rem] font-bold bg-accent-gradient bg-clip-text text-transparent mt-8 mb-6 tracking-tight" style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                        New Collection Metadata
+                        <span className="block absolute left-0 bottom-[-8px] w-[60px] h-[3px] bg-accent-gradient rounded" aria-hidden="true"></span>
+                    </h2>
+                    {[
                             { id: "category", label: "Category of the collection :", placeholder: "Category" },
                             { id: "name", label: "Name of the collection :", placeholder: "Collection Name" },
                             { id: "description", label: "Description of the collection :", placeholder: "Collection Description" },
-                        ].map(({ id, label, placeholder }) => (
-                            <div key={id} className="mb-6">
-                                <label htmlFor={id} className="block text-[1.1rem] text-text-secondary mt-4 mb-2 font-semibold tracking-wide">{label}</label>
-                                <input type="text" id={id} placeholder={placeholder}
+                    ].map(({ id, label, placeholder }) => (
+                        <div key={id} className="mb-6">
+                            <label htmlFor={id} className="block text-[1.1rem] text-text-secondary mt-4 mb-2 font-semibold tracking-wide">{label}</label>
+                            <input type="text" id={id} placeholder={placeholder}
                                     className="w-full p-4 border-2 border-border rounded-lg bg-surface-light text-base text-text-primary transition-all backdrop-blur font-medium focus:outline-none focus:border-primary focus:shadow-[0_0_0_4px_rgba(0,220,130,0.15)] focus:scale-[1.02] placeholder:text-text-muted placeholder:font-normal" onChange={handleCollectionChange} />
-                            </div>
-                        ))}
-                    </div>
+                        </div>
+                    ))}
+                </div>
                 )}
 
                 {/* Existing Collection Section */}
                 {collectionType === 'existing' && (
                     <div className="form-group bg-[rgba(22,23,27,0.5)] p-6 rounded-xl border border-border mb-6 transition-all hover:border-primary hover:bg-[rgba(22,23,27,0.7)]">
-                        <h2 className="relative text-[2rem] font-bold bg-accent-gradient bg-clip-text text-transparent mt-8 mb-6 tracking-tight" style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                            Existing Collection Info
-                            <span className="block absolute left-0 bottom-[-8px] w-[60px] h-[3px] bg-accent-gradient rounded" aria-hidden="true"></span>
-                        </h2>
-                        <div className="mb-6">
+                    <h2 className="relative text-[2rem] font-bold bg-accent-gradient bg-clip-text text-transparent mt-8 mb-6 tracking-tight" style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                        Existing Collection Info
+                        <span className="block absolute left-0 bottom-[-8px] w-[60px] h-[3px] bg-accent-gradient rounded" aria-hidden="true"></span>
+                    </h2>
+                    <div className="mb-6">
                             <label htmlFor="existingCollection-id" className="block text-[1.1rem] text-text-secondary mt-4 mb-2 font-semibold tracking-wide">Name of the collection :</label>
                             <input type="text" id="existingCollection-id" placeholder="Collection Name"
-                                className="w-full p-4 border-2 border-border rounded-lg bg-surface-light text-base text-text-primary transition-all backdrop-blur font-medium focus:outline-none focus:border-primary focus:shadow-[0_0_0_4px_rgba(0,220,130,0.15)] focus:scale-[1.02] placeholder:text-text-muted placeholder:font-normal" />
-                        </div>
+                            className="w-full p-4 border-2 border-border rounded-lg bg-surface-light text-base text-text-primary transition-all backdrop-blur font-medium focus:outline-none focus:border-primary focus:shadow-[0_0_0_4px_rgba(0,220,130,0.15)] focus:scale-[1.02] placeholder:text-text-muted placeholder:font-normal" />
+                    </div>
                     </div>
                 )}
 

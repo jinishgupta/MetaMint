@@ -20,7 +20,7 @@ export const registerUser = createAsyncThunk(
 
   async (formData) => {
     const response = await axios.post(
-      "http://localhost:4000/api/signup",
+      "https://metamint.onrender.com/api/signup",
       formData,
       {
         withCredentials: true,
@@ -36,7 +36,7 @@ export const loginUser = createAsyncThunk(
 
   async (formData) => {
     const response = await axios.post(
-      "http://localhost:4000/api/login",
+      "https://metamint.onrender.com/api/login",
       formData,
       {
         withCredentials: true,
@@ -51,7 +51,7 @@ export const logoutUser = createAsyncThunk(
   "/auth/logout",
   async () => {
     const response = await axios.post(
-      "http://localhost:4000/api/logout",
+      "https://metamint.onrender.com/api/logout",
       {},
       {
         withCredentials: true,
@@ -66,7 +66,7 @@ export const checkAuth = createAsyncThunk(
 
   async () => {
     const response = await axios.get(
-      "http://localhost:4000/api/check-auth",
+      "https://metamint.onrender.com/api/check-auth",
       {
         withCredentials: true,
         headers :{ 'Cache-Control': 'no-cache, no-store, must-revalidate, proxy-revalidate' }
@@ -80,7 +80,7 @@ export const fetchProfile = createAsyncThunk(
   'auth/fetchProfile',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get('http://localhost:4000/api/user/profile', { withCredentials: true });
+      const response = await axios.get('https://metamint.onrender.com/api/user/profile', { withCredentials: true });
       return response.data.user;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Network Error');
@@ -92,7 +92,7 @@ export const updateProfile = createAsyncThunk(
   'auth/updateProfile',
   async (formData, { rejectWithValue }) => {
     try {
-      const response = await axios.put('http://localhost:4000/api/user/profile', formData, {
+      const response = await axios.put('https://metamint.onrender.com/api/user/profile', formData, {
         withCredentials: true,
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -107,7 +107,7 @@ export const changePassword = createAsyncThunk(
   'auth/changePassword',
   async (data, { rejectWithValue }) => {
     try {
-      const response = await axios.put('http://localhost:4000/api/user/password', data, { withCredentials: true });
+      const response = await axios.put('https://metamint.onrender.com/api/user/password', data, { withCredentials: true });
       return response.data.message;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Network Error');
@@ -119,7 +119,7 @@ export const googleLogin = createAsyncThunk(
   'auth/googleLogin',
   async (token, { rejectWithValue }) => {
     try {
-      const response = await axios.post('http://localhost:4000/api/google-login', { token }, { withCredentials: true });
+      const response = await axios.post('https://metamint.onrender.com/api/google-login', { token }, { withCredentials: true });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Google login failed');

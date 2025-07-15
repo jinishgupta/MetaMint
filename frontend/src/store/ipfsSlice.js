@@ -17,7 +17,7 @@ export const uploadImage = createAsyncThunk(
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await axios.post("http://localhost:4000/api/upload-image", formData, {
+      const response = await axios.post("https://metamint.onrender.com/api/upload-image", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -34,7 +34,7 @@ export const uploadData = createAsyncThunk(
   "ipfs/uploadData",
   async (metadata, { rejectWithValue }) => {
     try {
-      const response = await axios.post("http://localhost:4000/api/upload-data", metadata, {
+      const response = await axios.post("https://metamint.onrender.com/api/upload-data", metadata, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -51,7 +51,7 @@ export const fetchDataByCid = createAsyncThunk(
   "ipfs/fetchDataByCid",
   async (cid, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`http://localhost:4000/api/data/${cid}`);
+      const response = await axios.get(`https://metamint.onrender.com/api/data/${cid}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -64,7 +64,7 @@ export const fetchDataByGroup = createAsyncThunk(
   "ipfs/fetchDataByGroup",
   async (group, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`http://localhost:4000/api/data-group?group=${encodeURIComponent(group)}`);
+      const response = await axios.get(`https://metamint.onrender.com/api/data-group?group=${encodeURIComponent(group)}`);
       return response.data.nfts;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -76,7 +76,7 @@ export const fetchDataByName = createAsyncThunk(
   "ipfs/fetchDataByName",
   async (name, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`http://localhost:4000/api/data-name?name=${encodeURIComponent(name)}`);
+      const response = await axios.get(`https://metamint.onrender.com/api/data-name?name=${encodeURIComponent(name)}`);
       return response.data.nfts;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);

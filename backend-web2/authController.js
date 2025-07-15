@@ -55,7 +55,7 @@ const registerUser = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Invalid characters in username or email.'
-      });
+        });
     }
 
     try {

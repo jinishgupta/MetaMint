@@ -18,11 +18,14 @@ mongoose.connect(MONGODB_KEY).then(() => {
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+app.set('trust proxy', 1); // Trust first proxy for secure cookies on Render
+
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: ["https://metamint-frontend.onrender.com", "http://localhost:5173"],
   methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders : ["Content-Type", "Authorization", "Cache-Control", "Expires ", "Pragma"],  
-  credentials: true
+  allowedHeaders: ["Content-Type", "Authorization", "Cache-Control", "Expires", "Pragma"],
+  credentials: true,
+  exposedHeaders: ["Set-Cookie"]
 }));
 
 app.use(express.json());

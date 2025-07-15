@@ -98,11 +98,11 @@ function Collection() {
                     ) : nftData.length === 0 ? (
                       <div>No NFTs found in this collection.</div>
                     ) : (
-                      <div className="grid grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-8">
+                    <div className="grid grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-8">
                         {nftData.map((nft, idx) => (
                           <NFTCard key={idx} {...nft} />
                         ))}
-                      </div>
+                    </div>
                     )}
                 </div>
             </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { NFTcontract } from '../contracts';
+import { NFTcontract } from '../contracts/contracts';
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons';
@@ -22,7 +22,7 @@ function NFT() {
     const updateViews = async () => {
       const updatedNft = { ...nft, views: (parseInt(nft.views) || 0) + 1 };
       setNft(updatedNft);
-      await fetch('http://localhost:4000/api/update-pinata', {
+      await fetch('https://metamint.onrender.com/api/update-pinata', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: nft.id, updatedData: updatedNft }),
@@ -44,7 +44,7 @@ function NFT() {
       const updatedNft = { ...nft, favorites: (parseInt(nft.favorites) || 0) + 1 };
       setNft(updatedNft);
       setFavorited(true);
-      await fetch('http://localhost:4000/api/update-pinata', {
+      await fetch('https://metamint.onrender.com/api/update-pinata', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: nft.id, updatedData: updatedNft }),
@@ -58,7 +58,7 @@ function NFT() {
       const updatedNft = { ...nft, favorites: Math.max((parseInt(nft.favorites) || 1) - 1, 0) };
       setNft(updatedNft);
       setFavorited(false);
-      await fetch('http://localhost:4000/api/update-pinata', {
+      await fetch('https://metamint.onrender.com/api/update-pinata', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: nft.id, updatedData: updatedNft }),
@@ -122,7 +122,7 @@ function NFT() {
       const updatedNft = { ...nft, owner: newOwner };
       setNft(updatedNft);
       try {
-        await fetch('http://localhost:4000/api/update-pinata', {
+        await fetch('https://metamint.onrender.com/api/update-pinata', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: nft.id, updatedData: updatedNft }),
@@ -138,66 +138,66 @@ function NFT() {
     }
   };
 
-  return (
-    <div>
-      <Header />
+    return (
+        <div>
+            <Header />
       <div className="flex flex-col lg:flex-row w-full max-w-[1400px] mx-auto mt-8 px-2 md:px-4 gap-8">
-        {/* Left: NFT Info */}
+                {/* Left: NFT Info */}
         <div className="flex-1 max-w-xl w-full bg-[rgba(22,23,27,0.8)] backdrop-blur-[30px] border-2 border-glass-border rounded-2xl shadow-xl p-4 md:p-10 relative animate-fadeInUp mb-6 lg:mb-0">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-[2rem] md:text-[3.2rem] font-black bg-accent-gradient bg-clip-text text-transparent tracking-tight select-none" style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em' }}>
               {nft.name}
-            </h1>
+                    </h1>
             <button onClick={handleFavorite} className="focus:outline-none ml-4" title={favorited ? 'Remove from favorites' : 'Add to favorites'}>
               <FontAwesomeIcon icon={favorited ? faSolidHeart : faRegularHeart} className="text-2xl md:text-3xl text-primary transition-colors duration-200" />
             </button>
           </div>
-          <div className="h-[4px] w-[100px] bg-accent-gradient rounded mb-8" />
+                    <div className="h-[4px] w-[100px] bg-accent-gradient rounded mb-8" />
           <h2 className="text-2xl md:text-3xl font-bold text-text-primary mb-4 mt-8">About the NFT:</h2>
-          <div className="h-[3px] w-[60px] bg-accent-gradient rounded mb-6" />
+                    <div className="h-[3px] w-[60px] bg-accent-gradient rounded mb-6" />
           <p className="text-lg md:text-xl font-semibold text-primary mb-8">{nft.description}</p>
           <h3 className="text-xl md:text-2xl font-bold text-text-primary mb-6 mt-10">Details</h3>
-          <div className="bg-[rgba(22,23,27,0.5)] rounded-xl p-8 mb-8">
-            <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
-              <span className="text-text-secondary">Owner:</span>
+                    <div className="bg-[rgba(22,23,27,0.5)] rounded-xl p-8 mb-8">
+                        <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
+                            <span className="text-text-secondary">Owner:</span>
               <span className="text-primary">{nft.owner}</span>
-            </div>
-            <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
-              <span className="text-text-secondary">Category:</span>
+                        </div>
+                        <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
+                            <span className="text-text-secondary">Category:</span>
               <span className="text-primary">{nft.category}</span>
-            </div>
-            <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
-              <span className="text-text-secondary">Views:</span>
+                        </div>
+                        <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
+                            <span className="text-text-secondary">Views:</span>
               <span className="text-primary">{nft.views}</span>
-            </div>
-            <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
-              <span className="text-text-secondary">Favorites:</span>
+                        </div>
+                        <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
+                            <span className="text-text-secondary">Favorites:</span>
               <span className="text-primary">{nft.favorites}</span>
-            </div>
-            <div className="flex justify-between py-3 text-lg">
-              <span className="text-text-secondary">Price:</span>
+                        </div>
+                        <div className="flex justify-between py-3 text-lg">
+                            <span className="text-text-secondary">Price:</span>
               <span className="text-primary">{nft.price} ETH</span>
-            </div>
-          </div>
+                        </div>
+                    </div>
           <div className="flex flex-col items-center mt-8">
             <button className="bg-accent-gradient text-background text-lg font-bold py-3 px-8 rounded-xl shadow-md hover:bg-accent-gradient-hover hover:-translate-y-0.5 hover:shadow-lg hover:shadow-glow transition-all uppercase tracking-wide" onClick={handleBuy} disabled={buying}>
               {buying ? "Processing..." : "Buy Now"}
             </button>
             <div className="text-center text-primary mt-2">{buyResult}</div>
-          </div>
-        </div>
-        {/* Vertical Divider */}
-        <div className="w-[2px] bg-white/20 min-h-[500px] mx-4 rounded-full self-stretch" />
-        {/* Right: NFT Image */}
-        <div className="flex-1 flex items-center justify-center">
+                    </div>
+                </div>
+                {/* Vertical Divider */}
+                <div className="w-[2px] bg-white/20 min-h-[500px] mx-4 rounded-full self-stretch" />
+                {/* Right: NFT Image */}
+                <div className="flex-1 flex items-center justify-center">
           <div className="bg-[rgba(22,23,27,0.8)] backdrop-blur-[30px] border-2 border-glass-border rounded-2xl shadow-xl p-4 md:p-6 flex items-center justify-center max-w-xl w-full h-auto md:h-[850px]">
             <img src={`https://${nft.imageUrl}`} alt="NFT" className="rounded-2xl w-full h-auto max-h-[400px] md:max-h-[850px] object-cover" />
-          </div>
+                    </div>
+                </div>
+            </div>
+            <Footer />
         </div>
-      </div>
-      <Footer />
-    </div>
-  );
+    );
 }
 
 export default NFT;

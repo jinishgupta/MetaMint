@@ -158,7 +158,7 @@ const listDataByName = async (req,res) => {
     res.json({ success: true, nfts });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
-  }
+    }
 }
 
 // General update function for Pinata
@@ -176,7 +176,7 @@ const updateOnPinata = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
-  }
+  } 
 };
 
 export {

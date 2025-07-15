@@ -44,7 +44,7 @@ function Header() {
         alert('Please install MetaMask!');
       }
     };
-
+    
     const handleLogOut = () => {
         dispatch(logoutUser());
         navigate('/login');
@@ -91,12 +91,12 @@ function Header() {
                        }
                      }}
                    >
-                        <input 
+                    <input 
                          name="searchInput"
-                         placeholder="Search NFTs..."
-                         className="w-full px-4 py-2 bg-surface-light border-2 border-border rounded-lg text-text-primary text-base transition-all duration-300 h-10 flex items-center placeholder-text-muted font-normal focus:outline-none focus:border-green-400 focus:shadow-[0_0_0_4px_rgba(0,220,130,0.15)] focus:scale-102"
+                        placeholder="Search NFTs..."
+                        className="w-full px-4 py-2 bg-surface-light border-2 border-border rounded-lg text-text-primary text-base transition-all duration-300 h-10 flex items-center placeholder-text-muted font-normal focus:outline-none focus:border-green-400 focus:shadow-[0_0_0_4px_rgba(0,220,130,0.15)] focus:scale-102"
                          autoComplete="off"
-                       />
+                    />
                    </form>
                 </div>
 

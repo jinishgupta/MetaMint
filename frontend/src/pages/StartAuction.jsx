@@ -1,7 +1,7 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { useState, useEffect } from 'react';
-import { NFTcontract } from '../contracts';
+import { NFTcontract } from '../contracts/contracts';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import { uploadData } from "../store/ipfsSlice";
