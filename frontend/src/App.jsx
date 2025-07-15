@@ -14,6 +14,7 @@ import CheckAuth from './components/check-auth.jsx';
 import { checkAuth } from './store/authSlice.js';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   const dispatch = useDispatch();
@@ -24,7 +25,7 @@ function App() {
 
 
   return (
-    <div>
+    <ErrorBoundary>
       <Routes>
         <Route path="/" element={
           <CheckAuth isAuthenticated={isAuthenticated} >
@@ -84,7 +85,7 @@ function App() {
         {/* Add more routes as needed */}
         <Route path="*" element={<h1>Page Not Found</h1>} />
       </Routes>
-    </div>
+    </ErrorBoundary>
   );
 }
 

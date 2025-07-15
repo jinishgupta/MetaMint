@@ -29,6 +29,7 @@ function SearchAndSort() {
     sortOrder: 'asc',
     category: 'All',
   });
+  const [allAuctions, setAllAuctions] = useState([]);
   // Determine what to show based on hash
   const hash = location.hash?.toLowerCase();
   const showNFTs = !hash || hash === '#nft';
@@ -86,8 +87,34 @@ function SearchAndSort() {
           })
         );
         setAllCollections(allCollectionsMeta.filter(Boolean));
+
+        // Fetch all active auctions from contract
+        const auctions = await NFTcontract.getActiveAuctions();
+        // Fetch auction metadata for each auction
+        const auctionDetails = await Promise.all(
+          auctions.map(async (auction) => {
+            let meta = null;
+            if (auction.auctionURI) {
+              try {
+                const resp = await fetch(`https://${auction.auctionURI}`);
+                meta = await resp.json();
+              } catch (err) {
+                meta = null;
+              }
+            }
+            return {
+              auctionId: auction.auctionId?.toString?.() || auction.auctionId,
+              name: meta?.name || `Auction #${auction.auctionId}`,
+              imageUrl: meta?.imageUrl || '',
+              highestBid: auction.highestBid ? (parseFloat(auction.highestBid) / 1e18).toFixed(3) : '0',
+              endTime: auction.startTime && auction.duration ? new Date((parseInt(auction.startTime) + parseInt(auction.duration)) * 1000).toLocaleString() : '',
+              ...auction,
+            };
+          })
+        );
+        setAllAuctions(auctionDetails.filter(Boolean));
       } catch (err) {
-        setError('Failed to fetch NFTs or collections');
+        setError('Failed to fetch NFTs, collections, or auctions');
       } finally {
         setLoading(false);
       }
@@ -203,6 +230,17 @@ function SearchAndSort() {
                       <NFTCard key={idx} {...nft} />
                     ))}
                   </div>
+                </>
+              )}
+              {/* Auctions Section */}
+              {hash === '#auction' && (
+                <>
+                  <h2 className="text-2xl font-bold mb-4 mt-8 text-white">Auctions</h2>
+                  <div className="grid grid-cols-4 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 xs:grid-cols-1 gap-8 justify-center min-h-[200px] w-full">
+                    {allAuctions.length === 0 ? <div className='col-span-4 text-center'>No auctions found.</div> : allAuctions.map((auction, idx) => (
+                      <AuctionCard key={auction.auctionId || idx} {...auction} />
+                    ))}
+                  </div> 
                 </>
               )}
               {showCollections && (

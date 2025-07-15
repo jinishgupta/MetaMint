@@ -46,7 +46,6 @@ function Collection() {
         setNftData(results.filter(Boolean));
       } catch (error) {
         setError('Failed to fetch NFTs');
-        console.log(error);
       } finally {
         setLoading(false);
       }

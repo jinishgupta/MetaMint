@@ -79,34 +79,58 @@ function NFT() {
         setBuying(false);
         return;
       }
-
-      // Convert price to wei
+      // Validate price
       const priceEth = nft.price;
+      if (!priceEth || isNaN(priceEth) || parseFloat(priceEth) <= 0) {
+        setBuyResult("Invalid NFT price.");
+        setBuying(false);
+        return;
+      }
+      // Validate tokenId
+      const tokenId = nft.tokenId;
+      if (!tokenId || isNaN(tokenId)) {
+        setBuyResult("No valid tokenId provided for this NFT.");
+        setBuying(false);
+        return;
+      }
+      // Convert price to wei
       let priceWei;
       try {
         priceWei = window.ethers ? window.ethers.parseEther(priceEth) : (parseFloat(priceEth) * 1e18).toString();
       } catch (err) {
         priceWei = (parseFloat(priceEth) * 1e18).toString();
       }
-      const tokenId = nft.tokenId;
-      if (!tokenId) {
-        setBuyResult("No tokenId provided for this NFT.");
+      let tx;
+      try {
+        tx = await NFTcontract.buyNFT(tokenId, { value: priceWei });
+      } catch (err) {
+        setBuyResult("Blockchain buy failed: " + (err.message || err));
         setBuying(false);
         return;
       }
-      const tx = await NFTcontract.buyNFT(tokenId, { value: priceWei });
       setBuyResult("Waiting for transaction confirmation...");
-      await tx.wait();
+      try {
+        await tx.wait();
+      } catch (err) {
+        setBuyResult("Transaction failed: " + (err.message || err));
+        setBuying(false);
+        return;
+      }
       setBuyResult("NFT purchased successfully!");
       // Update owner username after purchase
       const newOwner = localStorage.getItem('username') || walletAddress;
       const updatedNft = { ...nft, owner: newOwner };
       setNft(updatedNft);
-      await fetch('http://localhost:4000/api/update-pinata', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: nft.id, updatedData: updatedNft }),
-      });
+      try {
+        await fetch('http://localhost:4000/api/update-pinata', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: nft.id, updatedData: updatedNft }),
+        });
+      } catch (err) {
+        // Log but don't block UI
+        console.error('Failed to update Pinata:', err);
+      }
     } catch (err) {
       setBuyResult("Purchase failed: " + (err.message || err));
     } finally {
@@ -117,22 +141,22 @@ function NFT() {
   return (
     <div>
       <Header />
-      <div className="flex w-full max-w-[1400px] mx-auto mt-8 px-4 gap-8">
+      <div className="flex flex-col lg:flex-row w-full max-w-[1400px] mx-auto mt-8 px-2 md:px-4 gap-8">
         {/* Left: NFT Info */}
-        <div className="flex-1 max-w-xl h-[900px] bg-[rgba(22,23,27,0.8)] backdrop-blur-[30px] border-2 border-glass-border rounded-2xl shadow-xl p-10 relative animate-fadeInUp">
+        <div className="flex-1 max-w-xl w-full bg-[rgba(22,23,27,0.8)] backdrop-blur-[30px] border-2 border-glass-border rounded-2xl shadow-xl p-4 md:p-10 relative animate-fadeInUp mb-6 lg:mb-0">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-[3.2rem] font-black bg-accent-gradient bg-clip-text text-transparent tracking-tight select-none" style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em' }}>
+            <h1 className="text-[2rem] md:text-[3.2rem] font-black bg-accent-gradient bg-clip-text text-transparent tracking-tight select-none" style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em' }}>
               {nft.name}
             </h1>
             <button onClick={handleFavorite} className="focus:outline-none ml-4" title={favorited ? 'Remove from favorites' : 'Add to favorites'}>
-              <FontAwesomeIcon icon={favorited ? faSolidHeart : faRegularHeart} className="text-3xl text-primary transition-colors duration-200" />
+              <FontAwesomeIcon icon={favorited ? faSolidHeart : faRegularHeart} className="text-2xl md:text-3xl text-primary transition-colors duration-200" />
             </button>
           </div>
           <div className="h-[4px] w-[100px] bg-accent-gradient rounded mb-8" />
-          <h2 className="text-3xl font-bold text-text-primary mb-4 mt-8">About the NFT:</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-text-primary mb-4 mt-8">About the NFT:</h2>
           <div className="h-[3px] w-[60px] bg-accent-gradient rounded mb-6" />
-          <p className="text-xl font-semibold text-primary mb-8">{nft.description}</p>
-          <h3 className="text-2xl font-bold text-text-primary mb-6 mt-10">Details</h3>
+          <p className="text-lg md:text-xl font-semibold text-primary mb-8">{nft.description}</p>
+          <h3 className="text-xl md:text-2xl font-bold text-text-primary mb-6 mt-10">Details</h3>
           <div className="bg-[rgba(22,23,27,0.5)] rounded-xl p-8 mb-8">
             <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
               <span className="text-text-secondary">Owner:</span>
@@ -166,8 +190,8 @@ function NFT() {
         <div className="w-[2px] bg-white/20 min-h-[500px] mx-4 rounded-full self-stretch" />
         {/* Right: NFT Image */}
         <div className="flex-1 flex items-center justify-center">
-          <div className="bg-[rgba(22,23,27,0.8)] backdrop-blur-[30px] border-2 border-glass-border rounded-2xl shadow-xl p-6 flex items-center justify-center max-w-xl w-full h-[850px]">
-            <img src={`https://${nft.imageUrl}`} alt="NFT" className="rounded-2xl w-full h-full object-cover" />
+          <div className="bg-[rgba(22,23,27,0.8)] backdrop-blur-[30px] border-2 border-glass-border rounded-2xl shadow-xl p-4 md:p-6 flex items-center justify-center max-w-xl w-full h-auto md:h-[850px]">
+            <img src={`https://${nft.imageUrl}`} alt="NFT" className="rounded-2xl w-full h-auto max-h-[400px] md:max-h-[850px] object-cover" />
           </div>
         </div>
       </div>

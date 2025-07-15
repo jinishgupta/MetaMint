@@ -100,7 +100,6 @@ function Profile() {
             url = `https://${tokenURI}`;
             try {
               const resp = await fetch(url);
-              console.log(resp);
               metadata = await resp.json();
             } catch (err) {
               metadata = null;

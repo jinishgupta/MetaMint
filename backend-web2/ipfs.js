@@ -19,7 +19,6 @@ const uploadImageToIPFS = async (req, res) => {
     if (req.body.imageName) imageUpload = imageUpload.name(req.body.imageName);
     if (req.body.keyvalues) imageUpload = imageUpload.keyvalues(req.body.keyvalues);
     const imageResult = await imageUpload;
-    console.log("Image Result: ", imageResult);
     res.json({
     success: true,
       imageCid: imageResult.cid,
@@ -34,7 +33,17 @@ const uploadImageToIPFS = async (req, res) => {
 const uploadDataToIPFS = async (req, res) => {
   try {
     const data = req.body;
-    console.log(data);
+    // Sanitize and validate input
+    if (typeof data.name === 'string' && /<|>|script/i.test(data.name)) {
+      return res.status(400).json({ success: false, message: 'Invalid characters in name.' });
+    }
+    if (typeof data.description === 'string' && /<|>|script/i.test(data.description)) {
+      return res.status(400).json({ success: false, message: 'Invalid characters in description.' });
+    }
+    // Limit metadata size
+    if (JSON.stringify(data).length > 10 * 1024) {
+      return res.status(400).json({ success: false, message: 'Metadata too large.' });
+    }
     let groupId = undefined; // Use a local variable, not global
     let category = typeof data.category === 'string' ? data.category.toLowerCase() : '';
     if (data.type === "auction") {
@@ -54,7 +63,6 @@ const uploadDataToIPFS = async (req, res) => {
           groupId = "63de8052-6580-4731-ab47-6d46e0a3e8ba";
           break;
         default:
-          console.error('Invalid or missing NFT category:', data.category);
           return res.status(400).json({ success: false, message: 'Invalid or missing NFT category' });
       }
     } else {
@@ -72,13 +80,11 @@ const uploadDataToIPFS = async (req, res) => {
           groupId = "1a5190f2-45b7-4fda-93d6-7a8e1762e717";
           break;
         default:
-          console.error('Invalid or missing collection category:', data.category);
           return res.status(400).json({ success: false, message: 'Invalid or missing collection category' });
       }
     }
     // Validate groupId
     if (!groupId || typeof groupId !== 'string' || !/^[0-9a-fA-F-]{36}$/.test(groupId)) {
-      console.error('Invalid groupId:', groupId);
       return res.status(400).json({ success: false, message: 'Invalid groupId for Pinata group' });
     }
     let metadataUpload = pinata.upload.public.json(data).group(groupId);
@@ -94,9 +100,7 @@ const uploadDataToIPFS = async (req, res) => {
           groupId: groupId,
           files: [metadataResult.id]
         });
-        console.log('Added file to group after upload:', addResult);
       } catch (addErr) {
-        console.error('Failed to add file to group after upload:', addErr);
       }
     }
     res.json({

@@ -34,7 +34,6 @@ const sendVerificationEmail = (email, token) => {
 
 //register
 const registerUser = async (req, res) => {
-    console.log("Request body:", req.body);
     const { userName, email, password } = req.body;
 
     
@@ -45,11 +44,18 @@ const registerUser = async (req, res) => {
     if (!password) missingFields.push('password');
 
     if (missingFields.length > 0) {
-        console.log("Validation failed - Missing fields:", missingFields);
         return res.status(400).json({
             success: false,
             message: `Please provide ${missingFields.join(', ')}`
         });
+    }
+
+    // Sanitize and validate input
+    if (/<|>|script/i.test(userName) || /<|>|script/i.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid characters in username or email.'
+      });
     }
 
     try {
@@ -68,7 +74,6 @@ const registerUser = async (req, res) => {
             message: "Verification email sent. Check your inbox to complete signup."
         });
     } catch(e) {
-        console.error("Registration error:", e);
         const errorMessage = e.message || "Some error occurred";
         res.status(500).json({
             success: false,
@@ -86,13 +91,10 @@ const verifyEmail = async (req, res) => {
         const { userName, email, password } = decoded;
         const exists = await User.findOne({ email });
         if (exists) return res.send("Account already verified. Please login.");
-        console.log("saving new user:", { userName, email, password });
         const newUser = new User({ userName, email, password });
         await newUser.save();
-        console.log("New user saved:", newUser);
         res.status(200).send("Email verified successfully. You can now login.");
     } catch (err) {
-        console.log(err);
         res.status(400).send("Invalid or expired token");
     }
 }
@@ -101,6 +103,14 @@ const verifyEmail = async (req, res) => {
 
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
+
+    // Sanitize input
+    if (/<|>|script/i.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid characters in email.'
+      });
+    }
 
     try{
         const user = await User.findOne({ email });
@@ -134,7 +144,6 @@ const loginUser = async (req, res) => {
         });
 
     } catch(e) {
-        console.log(e);
         res.status(500).json({
             success: false,
             message:"Some error occured"
@@ -146,7 +155,6 @@ const loginUser = async (req, res) => {
 
 const logoutUser = async (req, res) => {
     try {
-        console.log("Logging out user");
         res.clearCookie('token', {
             httpOnly: true,
             secure: true,
@@ -156,7 +164,6 @@ const logoutUser = async (req, res) => {
             message: "Logout successful"
         });
     } catch (e) {
-        console.log(e);
         res.status(500).json({
             success: false,
             message: "Some error occurred"
@@ -216,7 +223,6 @@ const googleLogin = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
     res.status(401).json({ success: false, message: "Invalid Google token" });
   }
 };
@@ -237,7 +243,6 @@ const authMiddleware = async (req, res, next) => {
         req.user = await User.findById(decoded.id).select('-password');
         next();
     } catch (e) {
-        console.log(e);
         return res.status(401).json({
             success: false,
             message: "Unauthorized user!"
@@ -260,9 +265,19 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { userName } = req.body;
+    if (userName && /<|>|script/i.test(userName)) {
+      return res.status(400).json({ success: false, message: 'Invalid characters in username.' });
+    }
     let update = {};
     if (userName) update.userName = userName;
     if (req.file) {
+      // Validate file type and size
+      if (!req.file.mimetype.startsWith('image/')) {
+        return res.status(400).json({ success: false, message: 'Only image files are allowed.' });
+      }
+      if (req.file.size > 15 * 1024 * 1024) {
+        return res.status(400).json({ success: false, message: 'File size exceeds 15MB.' });
+      }
       // Upload image to Cloudinary
       const uploadResult = await imageUploadUtil("data:image/png;base64," + req.file.buffer.toString('base64'));
       if (uploadResult && uploadResult.success && uploadResult.url) {

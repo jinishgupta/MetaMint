@@ -9,8 +9,10 @@ function SignUpPage() {
     const [formData, setFormData] = useState({
         userName: '',
         email: '',
-        password: ''
+        password: '',
+        confirmPassword: ''
     });
+    const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
     function handleChange(e){
@@ -20,12 +22,31 @@ function SignUpPage() {
     function handleSubmit(e){
         e.preventDefault();
         setLoading(true);
+        setError("");
+        // Input validation
+        if (!formData.userName || !formData.email || !formData.password || !formData.confirmPassword) {
+            setError("All fields are required.");
+            setLoading(false);
+            return;
+        }
+        if (/<|>|script/i.test(formData.userName) || /<|>|script/i.test(formData.email)) {
+            setError("Invalid characters in username or email.");
+            setLoading(false);
+            return;
+        }
+        if (formData.password !== formData.confirmPassword) {
+            setError("Passwords do not match.");
+            setLoading(false);
+            return;
+        }
         try{
             dispatch(registerUser(formData));
             setLoading(false);
+            setFormData({ userName: '', email: '', password: '', confirmPassword: '' });
             navigate('/login');
         }catch(error){
-            console.log(error.message);
+            setError(error.message);
+            setLoading(false);
         }
     }
     return (
@@ -36,8 +57,8 @@ function SignUpPage() {
             > 
                 <div className="shimmer-line" />
                 <div className="text-center w-full relative z-[1]">
-                    <h1 className="text-[3.5rem] md:text-[2.8rem] sm:text-[2.4rem] mb-4 font-black bg-accent-gradient bg-clip-text text-transparent tracking-tight animate-fadeInUp" style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Sign Up</h1>
-                    <p className="subtitle text-[1.2rem] md:text-[1.1rem] sm:text-[1rem] text-text-secondary mb-12 md:mb-10 sm:mb-8 font-medium animate-fadeInUp">Create your account and start exploring NFTs!</p>
+                    <h1 className="text-[2.5rem] md:text-[2rem] sm:text-[1.5rem] mb-4 font-black bg-accent-gradient bg-clip-text text-transparent tracking-tight animate-fadeInUp" style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Sign Up</h1>
+                    <p className="subtitle text-[1.1rem] md:text-[1rem] sm:text-[0.95rem] text-text-secondary mb-10 md:mb-8 sm:mb-6 font-medium animate-fadeInUp">Create your account and start exploring NFTs!</p>
                     <form id="signup-form" onSubmit={handleSubmit}>
                         <div className="form-group text-left mb-8 sm:mb-6 animate-fadeInUp">
                             <label htmlFor="name" className="block text-base mb-3 text-text-primary font-semibold tracking-wide">Full Name</label>
@@ -53,8 +74,9 @@ function SignUpPage() {
                         </div>
                         <div className="form-group text-left mb-8 sm:mb-6 animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
                             <label htmlFor="confirm-password" className="block text-base mb-3 text-text-primary font-semibold tracking-wide">Confirm Password</label>
-                            <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required className="w-full p-4 md:p-3 sm:p-3 border-2 border-border rounded-lg bg-surface-light text-base text-text-primary font-medium transition-all backdrop-blur focus:outline-none focus:border-primary focus:shadow-[0_0_0_4px_rgba(0,220,130,0.15)] focus:scale-[1.02] placeholder:text-text-muted placeholder:font-normal" onChange={handleChange} value={formData.confirmPassword} />
+                            <input type="password" id="confirm-password" name="confirmPassword" placeholder="Confirm your password" required className="w-full p-4 md:p-3 sm:p-3 border-2 border-border rounded-lg bg-surface-light text-base text-text-primary font-medium transition-all backdrop-blur focus:outline-none focus:border-primary focus:shadow-[0_0_0_4px_rgba(0,220,130,0.15)] focus:scale-[1.02] placeholder:text-text-muted placeholder:font-normal" onChange={handleChange} value={formData.confirmPassword} />
                         </div>
+                        {error && <div className="text-red-400 mb-2">{error}</div>}
                         <button type="submit" id="signup-button" className="w-full py-5 md:py-4 sm:py-4 bg-accent-gradient hover:bg-accent-gradient-hover border-none rounded-lg text-[1.1rem] text-text-primary cursor-pointer font-bold transition-all shadow-lg relative overflow-hidden uppercase tracking-wide animate-fadeInUp hover:shadow-xl hover:shadow-glow hover:-translate-y-1 active:-translate-y-0.5" style={{ animationDelay: '0.4s' }} disabled={loading}> {loading ? 'Signing up...' : 'Sign Up'} </button>
                     </form>
                     <p className="extra-text mt-10 sm:mt-8 text-base sm:text-sm text-text-secondary font-medium animate-fadeInUp" style={{ animationDelay: '0.6s' }}>

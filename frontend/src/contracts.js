@@ -2,7 +2,7 @@ import marketplaceAbi from '../../backend-web3/artifacts/contracts/NFTMarketplac
 import { BrowserProvider, Contract } from 'ethers';
 
 const MARKETPLACE_ABI = marketplaceAbi.abi;
-const MARKETPLACE_ADDRESS = '0xdA5AF4929ecc89fF8a32227B015BAF94BB643C65' ;
+const MARKETPLACE_ADDRESS = '0x83AE6c878d412B46E05dE23Ce3744CeDB8dE6daa' ;
 
 // Dynamic contract initialization function
 export const getNFTContract = async () => {
@@ -21,7 +21,7 @@ export const NFTcontract = {
     const contract = await getNFTContract();
     return contract.getCurrentToken();
   },
-  getListPrice: async () => {
+  getListPrice: async () => { 
     const contract = await getNFTContract();
     return contract.getListPrice();
   },
@@ -40,5 +40,38 @@ export const NFTcontract = {
   getAllNFTs: async () => {
     const contract = await getNFTContract();
     return contract.getAllNFTs();
+  },
+  // --- Auction Functions ---
+  createAuction: async (tokenId, minBid, duration, auctionURI, options) => {
+    const contract = await getNFTContract();
+    return contract.createAuction(tokenId, minBid, duration, auctionURI, options);
+  },
+  placeBid: async (auctionId, name, options) => {
+    const contract = await getNFTContract();
+    return contract.placeBid(auctionId, name, options);
+  },
+  settleAuction: async (auctionId, options) => {
+    const contract = await getNFTContract();
+    return contract.settleAuction(auctionId, options);
+  },
+  getActiveAuctions: async () => {
+    const contract = await getNFTContract();
+    return contract.getActiveAuctions();
+  },
+  getNonActiveAuctions: async () => {
+    const contract = await getNFTContract();
+    return contract.getNonActiveAuctions();
+  },
+  getMyAuctions: async (userAddress) => {
+    const contract = await getNFTContract();
+    return contract.getMyAuctions(userAddress);
+  },
+  getAllBids: async (auctionId) => {
+    const contract = await getNFTContract();
+    return contract.getAllBids(auctionId);
+  },
+  getCurrentAuctionId: async () => {
+    const contract = await getNFTContract();
+    return contract.getCurrentAuctionId();
   }
 };

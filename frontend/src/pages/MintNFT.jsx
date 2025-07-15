@@ -5,6 +5,7 @@ import { uploadData, uploadImage } from '../store/ipfsSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { NFTcontract } from '../contracts';
 import { fetchDataByName } from '../store/ipfsSlice';
+import { useNavigate } from 'react-router-dom';
 
 function MintNFT() {
     const [collectionType, setCollectionType] = useState('new');
@@ -18,7 +19,6 @@ function MintNFT() {
         floor:"",
         volume:"",
         items:"1",
-        id:"",
         nfts:[]
     });
     const [nftData, setNftData] = useState({
@@ -30,12 +30,12 @@ function MintNFT() {
         owner: user.userName,
         views: 0,
         favorites: 0,
-        id:""
     })
     const [nftImage, setNftImage] = useState(null);
     const [minting, setMinting] = useState(false);
     const [mintResult, setMintResult] = useState("");
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const GATEWAY_URL = 'white-generous-iguana-225.mypinata.cloud';
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -63,8 +63,16 @@ function MintNFT() {
         setMintResult("");
 
         // Basic validation
-        if (!nftData["name"] || !nftImage) {group
+        if (!nftData["name"] || !nftImage) {
             setMintResult("NFT name and image are required.");
+            return;
+        }
+        if (/<|>|script/i.test(nftData["name"]) || /<|>|script/i.test(nftData["description"])) {
+            setMintResult("Invalid characters in NFT name or description.");
+            return;
+        }
+        if (isNaN(nftData.price) || parseFloat(nftData.price) <= 0) {
+            setMintResult("NFT price must be a positive number.");
             return;
         }
         if (collectionType === "new" && (!collectionData["name"] || !collectionData["category"] || !collectionData["description"])) {
@@ -197,6 +205,32 @@ function MintNFT() {
                   setMintResult("Waiting for transaction confirmation...");
                   await tx.wait();
                   setMintResult("NFT Minted successfully on blockchain!");
+                  // Clear all inputs and redirect
+                  setNftData({
+                    name: "",
+                    category: "",
+                    description: "",
+                    price: "",
+                    type: "nft",
+                    owner: user.userName,
+                    views: 0,
+                    favorites: 0,
+                    id: ""
+                  });
+                  setNftImage(null);
+                  setCollectionData({
+                    category: "",
+                    name: "",
+                    description: "",
+                    type: "collection",
+                    date: "",
+                    floor: "",
+                    volume: "",
+                    items: "1",
+                    id: "",
+                    nfts: []
+                  });
+                  setTimeout(() => navigate('/'), 1000);
                 } catch (err) {
                   setMintResult("Blockchain mint failed: " + (err.message || err));
                   return;
