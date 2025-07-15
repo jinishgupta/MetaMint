@@ -19,6 +19,7 @@ function LoginPage() {
 
     function handleSubmit(e){
         e.preventDefault();
+        if (loading) return; // Prevent double submit
         setLoading(true);
         setError("");
         // Input validation
@@ -32,15 +33,17 @@ function LoginPage() {
             setLoading(false);
             return;
         }
-        try{
-            dispatch(loginUser(formData));
+        dispatch(loginUser(formData))
+          .unwrap()
+          .then(() => {
             setLoading(false);
             setFormData({ email: '', password: '' });
             navigate('/');
-        }catch(error){
+          })
+          .catch(error => {
             setError(error.message);
             setLoading(false);
-        }
+          });
     }
 
     return(
@@ -62,7 +65,13 @@ function LoginPage() {
                 <label htmlFor="password" className="block text-base mb-3 text-text-primary font-semibold tracking-wide">Password</label>
                 <input type="password" id="login_password" name="password" placeholder="Enter your password" required className="w-full p-4 md:p-3 sm:p-3 border-2 border-border rounded-lg bg-surface-light text-base text-text-primary font-medium transition-all backdrop-blur focus:outline-none focus:border-primary focus:shadow-[0_0_0_4px_rgba(0,220,130,0.15)] focus:scale-[1.02] placeholder:text-text-muted placeholder:font-normal" onChange={handleChange} value={formData.password} />  
               </div>
-                <button type="submit" id="login-btn" className="w-full py-5 md:py-4 sm:py-4 bg-accent-gradient hover:bg-accent-gradient-hover border-none rounded-lg text-[1.1rem] text-text-primary cursor-pointer font-bold transition-all shadow-lg relative overflow-hidden uppercase tracking-wide animate-fadeInUp hover:shadow-xl hover:shadow-glow hover:-translate-y-1 active:-translate-y-0.5" style={{ animationDelay: '0.4s' }} disabled={loading}> {loading ? 'Logging in...' : 'Login'} </button>
+                <button
+          type="submit"
+          className="login-btn"
+          disabled={loading}
+        >
+          {loading ? 'Logging in...' : 'LOGIN'}
+        </button>
                 {error && <div className="text-red-400 mb-2">{error}</div>}
             </form>
             <p className="extra-text mt-10 sm:mt-8 text-base sm:text-sm text-text-secondary font-medium animate-fadeInUp" style={{ animationDelay: '0.6s' }}>

@@ -139,6 +139,29 @@ function SearchAndSort() {
     return matchesSearch && matchesCategory;
   });
 
+  // Add auctions to the filter and sort logic
+  let filteredAuctions = allAuctions.filter(auction => {
+    const matchesSearch = auction?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = appliedSort.category === 'All' || (auction?.category?.toLowerCase() === appliedSort.category.toLowerCase());
+    return matchesSearch && matchesCategory;
+  });
+  if (appliedSort.sortCriteria !== 'none') {
+    filteredAuctions = [...filteredAuctions].sort((a, b) => {
+      if (appliedSort.sortCriteria === 'name') {
+        const nameA = a?.name?.toLowerCase() || '';
+        const nameB = b?.name?.toLowerCase() || '';
+        if (nameA < nameB) return appliedSort.sortOrder === 'asc' ? -1 : 1;
+        if (nameA > nameB) return appliedSort.sortOrder === 'asc' ? 1 : -1;
+        return 0;
+      } else if (appliedSort.sortCriteria === 'price') {
+        const priceA = parseFloat(a?.highestBid) || 0;
+        const priceB = parseFloat(b?.highestBid) || 0;
+        return appliedSort.sortOrder === 'asc' ? priceA - priceB : priceB - priceA;
+      }
+      return 0;
+    });
+  }
+
   // Sort NFTs and collections only after Sort button is clicked
   if (appliedSort.sortCriteria !== 'none') {
     filteredNFTs = [...filteredNFTs].sort((a, b) => {
@@ -237,7 +260,7 @@ function SearchAndSort() {
                 <>
                   <h2 className="text-2xl font-bold mb-4 mt-8 text-white">Auctions</h2>
                   <div className="grid grid-cols-4 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 xs:grid-cols-1 gap-8 justify-center min-h-[200px] w-full">
-                    {allAuctions.length === 0 ? <div className='col-span-4 text-center'>No auctions found.</div> : allAuctions.map((auction, idx) => (
+                    {filteredAuctions.length === 0 ? <div className='col-span-4 text-center'>No auctions found.</div> : filteredAuctions.map((auction, idx) => (
                       <AuctionCard key={auction.auctionId || idx} {...auction} />
                     ))}
                   </div> 

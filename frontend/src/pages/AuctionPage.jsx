@@ -146,6 +146,30 @@ function AuctionPage() {
     try {
       const tx = await NFTcontract.settleAuction(auction.auctionId);
       await tx.wait();
+      // Update NFT owner on IPFS
+      // 1. Get highest bidder's username from bids
+      const allBids = await NFTcontract.getAllBids(auction.auctionId);
+      const highestBid = allBids && allBids.length > 0 ? allBids[allBids.length - 1] : null;
+      if (highestBid && auction.tokenId) {
+        // 2. Fetch NFT metadata from IPFS
+        const nftMetaRes = await fetchDataByName(auctionMeta.nftName || auction.nft_name || auction.name);
+        const nftFiles = nftMetaRes.payload;
+        if (nftFiles && nftFiles.length > 0) {
+          const nftFile = nftFiles[0];
+          const nftUrl = nftFile.url;
+          const nftId = nftFile.id;
+          const resp = await fetch(nftUrl);
+          const nftMeta = await resp.json();
+          // 3. Update owner field
+          nftMeta.owner = highestBid.name;
+          // 4. Push update to backend
+          await fetch('https://metamint.onrender.com/api/update-pinata', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: nftId, updatedData: nftMeta }),
+          });
+        }
+      }
       setSettleSuccess("Auction settled successfully!");
     } catch (err) {
       setSettleError("Failed to settle auction: " + (err?.message || err));

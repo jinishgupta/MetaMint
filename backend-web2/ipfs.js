@@ -77,7 +77,7 @@ const uploadDataToIPFS = async (req, res) => {
           groupId = "1a5190f2-45b7-4fda-93d6-7a8e1762e717";
           break;
         case "photography":
-          groupId = "1a5190f2-45b7-4fda-93d6-7a8e1762e717";
+          groupId = "547dcc55-66c1-483f-b05f-55240aeccc9b";
           break;
         default:
           return res.status(400).json({ success: false, message: 'Invalid or missing collection category' });

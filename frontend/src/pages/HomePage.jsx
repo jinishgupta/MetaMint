@@ -23,7 +23,7 @@ const ids = [
   { label: "art-collection", value: "e3268fb7-1445-404f-a32b-7e69f98c92d5" },
   { label: "gaming-collection", value: "c05915ab-a37a-4f38-a794-6197b2299167" },
   { label: "pfp-collection", value: "1a5190f2-45b7-4fda-93d6-7a8e1762e717" },
-  { label: "photography-collection", value: "1a5190f2-45b7-4fda-93d6-7a8e1762e717" },
+  { label: "photography-collection", value: "547dcc55-66c1-483f-b05f-55240aeccc9b" },
 ]
 
 function getRandomItems(arr, n) {

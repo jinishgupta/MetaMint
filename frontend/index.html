@@ -9,5 +9,10 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <!-- Add a script to redirect all non-file requests to index.html for SPA routing (for static hosting environments) -->
+    <script>
+      // This is only for static hosting environments like Vercel/Netlify. For Vite/Render, configure rewrites in server settings.
+      // No-op for local dev, but helps on static hosts.
+    </script>
   </body>
 </html>
