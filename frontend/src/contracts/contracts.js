@@ -50,9 +50,9 @@ export const NFTcontract = {
     const contract = await getNFTContract();
     return contract.placeBid(auctionId, name, options);
   },
-  settleAuction: async (auctionId, options) => {
+  settleAuction: async (auctionId) => {
     const contract = await getNFTContract();
-    return contract.settleAuction(auctionId, options);
+    return contract.settleAuction(auctionId);
   },
   getActiveAuctions: async () => {
     const contract = await getNFTContract();
