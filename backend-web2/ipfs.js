@@ -165,12 +165,15 @@ const listDataByName = async (req,res) => {
 const updateOnPinata = async (req, res) => {
   console.log('[IPFS UPDATE] Incoming request:', req.body);
   try {
-    const { id, updatedData } = req.body; // id = file id or CID, updatedData = new JSON
+    const { id, updatedData } = req.body;
     if (!id || !updatedData) {
       return res.status(400).json({ success: false, message: 'Missing id or updatedData' });
     }
-    // https://docs.pinata.cloud/sdk/files/public/update
-    const updateResult = await pinata.update.public.json(id, updatedData);
+    // Use the correct SDK method
+    const updateResult = await pinata.files.public.update({
+      id,
+      metadata: updatedData, // or ...updatedData if you want to update multiple fields
+    });
     console.log('[IPFS UPDATE] Update successful:', updateResult);
     res.json({ success: true, message: 'Update successful' });
   } catch (error) {
