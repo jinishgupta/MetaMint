@@ -106,7 +106,6 @@ const verifyEmail = async (req, res) => {
 //login
 
 const loginUser = async (req, res) => {
-    console.log('[LOGIN] Incoming request:', req.body);
     const { email, password } = req.body;
 
     // Sanitize input
@@ -120,7 +119,6 @@ const loginUser = async (req, res) => {
     try{
         const user = await User.findOne({ email });
         if(!user) {
-            console.log('[LOGIN] User not found:', email);
             return res.status(400).json({
                 success: false,
                 message: "User does not exist with this email"
@@ -128,7 +126,6 @@ const loginUser = async (req, res) => {
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if(!isPasswordValid) {
-            console.log('[LOGIN] Invalid password for:', email);
             return res.status(400).json({
                 success: false,
                 message: "Invalid password"
@@ -149,9 +146,7 @@ const loginUser = async (req, res) => {
                 userName: user.userName
             }
         });
-        console.log('[LOGIN] Login successful for:', email);
     } catch(e) {
-        console.error('[LOGIN] Error:', e.message);
         res.status(500).json({
             success: false,
             message:"Some error occured"

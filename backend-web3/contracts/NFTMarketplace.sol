@@ -203,6 +203,7 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
         (bool sent, ) = owner.call{value: msg.value}("");
         require(sent, "Failed to send auction fee to owner");
         _auctionIds.increment();
+        _transfer(msg.sender, address(this), tokenId);
         uint256 newAuctionId = _auctionIds.current();
         auctions[newAuctionId] = AuctionItem({
             auctionId: newAuctionId,

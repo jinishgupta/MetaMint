@@ -163,6 +163,7 @@ const listDataByName = async (req,res) => {
 
 // General update function for Pinata
 const updateOnPinata = async (req, res) => {
+  console.log('[IPFS UPDATE] Incoming request:', req.body);
   try {
     const { id, updatedData } = req.body; // id = file id or CID, updatedData = new JSON
     if (!id || !updatedData) {
@@ -170,13 +171,12 @@ const updateOnPinata = async (req, res) => {
     }
     // https://docs.pinata.cloud/sdk/files/public/update
     const updateResult = await pinata.update.public.json(id, updatedData);
-    res.json({
-    success: true,
-      updateResult
-    });
+    console.log('[IPFS UPDATE] Update successful:', updateResult);
+    res.json({ success: true, message: 'Update successful' });
   } catch (error) {
+    console.error('[IPFS UPDATE] Error:', error);
     res.status(500).json({ success: false, message: error.message });
-  } 
+  }
 };
 
 export {

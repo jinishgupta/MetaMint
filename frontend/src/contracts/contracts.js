@@ -2,7 +2,7 @@ import marketplaceAbi from './NFTMarketplace.json';
 import { BrowserProvider, Contract } from 'ethers';
 
 const MARKETPLACE_ABI = marketplaceAbi.abi;
-const MARKETPLACE_ADDRESS = '0xa6F06Cc10A59AebBF2E366924441Be277012C7e8' ;
+const MARKETPLACE_ADDRESS = '0xAf8Bd31FfaBA6612B71ae1f1FC603D1607cb002c' ;
 
 // Dynamic contract initialization function
 export const getNFTContract = async () => {
