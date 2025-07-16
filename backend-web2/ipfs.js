@@ -172,7 +172,10 @@ const updateOnPinata = async (req, res) => {
     // Use the correct SDK method
     const updateResult = await pinata.files.public.update({
       id,
-      keyvalues: updatedData, // or ...updatedData if you want to update multiple fields
+      name: updatedData.name || "metadata.json",
+      keyvalues: Object.fromEntries(
+        Object.entries(updatedData).map(([k, v]) => [k, typeof v === "object" ? JSON.stringify(v) : String(v)])
+      ),
     });
     console.log('[IPFS UPDATE] Update successful:', updateResult);
     res.json({ success: true, message: 'Update successful' });
