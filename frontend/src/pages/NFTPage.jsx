@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons';
+import { ethers } from 'ethers';
+import { useSelector } from 'react-redux';
 
 function NFT() {
   const location = useLocation();
@@ -15,6 +17,10 @@ function NFT() {
   const [buyResult, setBuyResult] = useState("");
   const [nft, setNft] = useState(data);
   const [favorited, setFavorited] = useState(false);
+  const [relistLoading, setRelistLoading] = useState(false);
+  const [relistError, setRelistError] = useState("");
+  const [relistSuccess, setRelistSuccess] = useState("");
+  const user = useSelector(state => state.auth.user);
 
   // Increment views on mount
   useEffect(() => {
@@ -138,6 +144,35 @@ function NFT() {
     }
   };
 
+  // Relist NFT handler
+  const handleRelist = async () => {
+    setRelistLoading(true);
+    setRelistError("");
+    setRelistSuccess("");
+    const price = prompt("Enter the price (in ETH) to relist your NFT:");
+    if (!price || isNaN(price) || parseFloat(price) <= 0) {
+      setRelistError("Invalid price.");
+      setRelistLoading(false);
+      return;
+    }
+    try {
+      let priceWei;
+      try {
+        priceWei = ethers.parseEther(price);
+      } catch (err) {
+        priceWei = (parseFloat(price) * 1e18).toString();
+      }
+      const tx = await NFTcontract.relistNFT(nft.tokenId, priceWei);
+      await tx.wait();
+      setRelistSuccess("NFT relisted successfully!");
+      setNft({ ...nft, price, currentlyListed: true });
+    } catch (err) {
+      setRelistError("Failed to relist NFT: " + (err.message || err));
+    } finally {
+      setRelistLoading(false);
+    }
+  };
+
     return (
         <div>
             <Header />
@@ -185,6 +220,20 @@ function NFT() {
             </button>
             <div className="text-center text-primary mt-2">{buyResult}</div>
                     </div>
+            {/* Show Relist button if user owns the NFT and it's not currently listed */}
+            {nft.owner === user.userName && !nft.currentlyListed && (
+              <div className="my-4">
+                <button
+                  onClick={handleRelist}
+                  disabled={relistLoading}
+                  className="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-8 rounded-lg shadow-md hover:scale-105 transition-transform disabled:opacity-60 text-lg mb-2"
+                >
+                  {relistLoading ? 'Relisting...' : 'Relist NFT'}
+                </button>
+                {relistError && <div className="text-red-400 text-center text-base mt-1">{relistError}</div>}
+                {relistSuccess && <div className="text-green-400 text-center text-base mt-1">{relistSuccess}</div>}
+              </div>
+            )}
                 </div>
                 {/* Vertical Divider */}
                 <div className="w-[2px] bg-white/20 min-h-[500px] mx-4 rounded-full self-stretch" />

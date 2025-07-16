@@ -2,7 +2,7 @@ import marketplaceAbi from './NFTMarketplace.json';
 import { BrowserProvider, Contract } from 'ethers';
 
 const MARKETPLACE_ABI = marketplaceAbi.abi;
-const MARKETPLACE_ADDRESS = '0x125c0920b569E5318d03092b082776a341fD23c3' ;
+const MARKETPLACE_ADDRESS = '0x88081562Cd1ab50e381C799dA8064a8e37f04229' ;
 
 // Dynamic contract initialization function
 export const getNFTContract = async () => {
@@ -40,6 +40,10 @@ export const NFTcontract = {
   getAllNFTs: async () => {
     const contract = await getNFTContract();
     return contract.getAllNFTs();
+  },
+  relistNFT: async () => {
+    const contract = await getNFTContract();
+    return contract.relistNFT(tokenId, price);
   },
   // --- Auction Functions ---
   createAuction: async (tokenId, minBid, duration, auctionURI, options) => {

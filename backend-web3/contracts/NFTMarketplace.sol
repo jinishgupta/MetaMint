@@ -199,6 +199,7 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
         require(duration >= 60, "Auction duration must be at least 1 minute");
         require(idToListedToken[tokenId].seller == msg.sender || idToListedToken[tokenId].owner == msg.sender, "Not the owner");
         require(_exists(tokenId), "Token does not exist");
+        require(!idToListedToken[tokenId].currentlyListed, "NFT is already listed for sale");
         (bool sent, ) = owner.call{value: msg.value}("");
         require(sent, "Failed to send auction fee to owner");
         _auctionIds.increment();
@@ -246,8 +247,14 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
         if (item.highestBidder != address(0)) {
             _transfer(address(this), item.highestBidder, item.tokenId);
             payable(item.seller).transfer(item.highestBid);
+            // Update internal state for NFT ownership
+            idToListedToken[item.tokenId].owner = payable(item.highestBidder);
+            idToListedToken[item.tokenId].seller = payable(item.highestBidder);
         } else {
             _transfer(address(this), item.seller, item.tokenId);
+            // Update internal state for NFT ownership
+            idToListedToken[item.tokenId].owner = payable(item.seller);
+            idToListedToken[item.tokenId].seller = payable(item.seller);
         }
         emit AuctionFinalized(auctionId, item.tokenId, item.highestBidder, item.highestBid);
     }
@@ -324,5 +331,24 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
     // Get the current auction ID (auction count)
     function getCurrentAuctionId() public view returns (uint256) {
         return _auctionIds.current();
+    }
+
+    // Allow NFT owner to re-list their NFT for sale
+    function relistNFT(uint256 tokenId, uint256 price) external {
+        require(ownerOf(tokenId) == msg.sender, "Only the NFT owner can relist");
+        require(price > 0, "Price must be greater than zero");
+        idToListedToken[tokenId].currentlyListed = true;
+        idToListedToken[tokenId].price = price;
+        idToListedToken[tokenId].seller = payable(msg.sender);
+        idToListedToken[tokenId].owner = payable(address(this));
+        _transfer(msg.sender, address(this), tokenId);
+        emit TokenListedSuccess(
+            tokenId,
+            address(this),
+            msg.sender,
+            price,
+            true,
+            idToListedToken[tokenId].tokenURI
+        );
     }
 }
