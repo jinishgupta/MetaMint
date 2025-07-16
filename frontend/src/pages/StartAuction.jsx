@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { NFTcontract } from '../contracts/contracts';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
-import { uploadData } from "../store/ipfsSlice";
+import { uploadData, updateData, fetchDataByName } from "../store/ipfsSlice";
 import { ethers } from "ethers";
 
 function StartAuction() {
@@ -172,6 +172,19 @@ function StartAuction() {
         return;
       }
       setTxSuccess('Auction started successfully!');
+      // Update NFT metadata on IPFS: set currentlyListed: true
+      try {
+        const nftMetaRes = await dispatch(fetchDataByName(selectedNFT.name));
+        const nftFiles = nftMetaRes.payload;
+        if (nftFiles && nftFiles.length > 0) {
+          const nftFile = nftFiles[0];
+          const nftId = nftFile.id;
+          await dispatch(updateData({ id: nftId, updatedData: { ...nftFile, currentlyListed: true } }));
+        }
+      } catch (err) {
+        // Log but don't block UI
+        console.error('Failed to update NFT metadata after auction:', err);
+      }
       setTimeout(() => navigate('/search-and-sort#auction'), 1500);
     } catch (err) {
       setTxError('Failed to start auction.');

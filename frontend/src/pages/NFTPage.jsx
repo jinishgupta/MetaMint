@@ -8,7 +8,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart as faSolidHeart } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as faRegularHeart } from '@fortawesome/free-regular-svg-icons';
 import { ethers } from 'ethers';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { updateData } from '../store/ipfsSlice';
 
 function NFT() {
   const location = useLocation();
@@ -17,9 +18,7 @@ function NFT() {
   const [buyResult, setBuyResult] = useState("");
   const [nft, setNft] = useState(data);
   const [favorited, setFavorited] = useState(false);
-  const [relistLoading, setRelistLoading] = useState(false);
-  const [relistError, setRelistError] = useState("");
-  const [relistSuccess, setRelistSuccess] = useState("");
+  const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
 
   // Increment views on mount
@@ -124,21 +123,13 @@ function NFT() {
       }
       setBuyResult("NFT purchased successfully!");
       // Update owner username after purchase
-      const newOwner = localStorage.getItem('username') || walletAddress;
-      const updatedNft = { ...nft, owner: newOwner };
+      const newOwner = user.userName || walletAddress;
+      const updatedNft = { ...nft, owner: newOwner, currentlyListed: false };
       setNft(updatedNft);
-      try {
-        await fetch('https://metamint.onrender.com/api/update-pinata', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: nft.id, updatedData: updatedNft }),
-        });
-      } catch (err) {
-        // Log but don't block UI
-        console.error('Failed to update Pinata:', err);
+      // Update owner and currentlyListed on IPFS using updateData
+      if (nft.id) {
+        await dispatch(updateData({ id: nft.id, updatedData: updatedNft }));
       }
-    } catch (err) {
-      setBuyResult("Purchase failed: " + (err.message || err));
     } finally {
       setBuying(false);
     }
@@ -146,107 +137,113 @@ function NFT() {
 
   // Relist NFT handler
   const handleRelist = async () => {
-    setRelistLoading(true);
-    setRelistError("");
-    setRelistSuccess("");
     const price = prompt("Enter the price (in ETH) to relist your NFT:");
     if (!price || isNaN(price) || parseFloat(price) <= 0) {
-      setRelistError("Invalid price.");
-      setRelistLoading(false);
+      alert("Invalid price.");
       return;
     }
     try {
       let priceWei;
       try {
-        priceWei = ethers.parseEther(price);
+        priceWei = window.ethers ? window.ethers.parseEther(price) : (parseFloat(price) * 1e18).toString();
       } catch (err) {
         priceWei = (parseFloat(price) * 1e18).toString();
       }
-      const tx = await NFTcontract.relistNFT(nft.tokenId, priceWei);
-      await tx.wait();
-      setRelistSuccess("NFT relisted successfully!");
-      setNft({ ...nft, price, currentlyListed: true });
+      await NFTcontract.relistNFT(nft.tokenId, priceWei);
+      // Update IPFS metadata: set currentlyListed true and new price
+      const updatedNft = { ...nft, currentlyListed: true, price };
+      setNft(updatedNft);
+      if (nft.id) {
+        await dispatch(updateData({ id: nft.id, updatedData: updatedNft }));
+      }
+      alert("NFT relisted successfully!");
     } catch (err) {
-      setRelistError("Failed to relist NFT: " + (err.message || err));
-    } finally {
-      setRelistLoading(false);
+      alert("Failed to relist NFT: " + (err.message || err));
     }
   };
 
-    return (
-        <div>
-            <Header />
+  return (
+    <div>
+      <Header />
       <div className="flex flex-col lg:flex-row w-full max-w-[1400px] mx-auto mt-8 px-2 md:px-4 gap-8">
-                {/* Left: NFT Info */}
+        {/* Left: NFT Info */}
         <div className="flex-1 max-w-xl w-full bg-[rgba(22,23,27,0.8)] backdrop-blur-[30px] border-2 border-glass-border rounded-2xl shadow-xl p-4 md:p-10 relative animate-fadeInUp mb-6 lg:mb-0">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-[2rem] md:text-[3.2rem] font-black bg-accent-gradient bg-clip-text text-transparent tracking-tight select-none" style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em' }}>
               {nft.name}
-                    </h1>
+            </h1>
             <button onClick={handleFavorite} className="focus:outline-none ml-4" title={favorited ? 'Remove from favorites' : 'Add to favorites'}>
               <FontAwesomeIcon icon={favorited ? faSolidHeart : faRegularHeart} className="text-2xl md:text-3xl text-primary transition-colors duration-200" />
             </button>
           </div>
-                    <div className="h-[4px] w-[100px] bg-accent-gradient rounded mb-8" />
+          <div className="h-[4px] w-[100px] bg-accent-gradient rounded mb-8" />
           <h2 className="text-2xl md:text-3xl font-bold text-text-primary mb-4 mt-8">About the NFT:</h2>
-                    <div className="h-[3px] w-[60px] bg-accent-gradient rounded mb-6" />
+          <div className="h-[3px] w-[60px] bg-accent-gradient rounded mb-6" />
           <p className="text-lg md:text-xl font-semibold text-primary mb-8">{nft.description}</p>
           <h3 className="text-xl md:text-2xl font-bold text-text-primary mb-6 mt-10">Details</h3>
-                    <div className="bg-[rgba(22,23,27,0.5)] rounded-xl p-8 mb-8">
-                        <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
-                            <span className="text-text-secondary">Owner:</span>
+          <div className="bg-[rgba(22,23,27,0.5)] rounded-xl p-8 mb-8">
+            <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
+              <span className="text-text-secondary">Owner:</span>
               <span className="text-primary">{nft.owner}</span>
-                        </div>
-                        <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
-                            <span className="text-text-secondary">Category:</span>
+            </div>
+            <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
+              <span className="text-text-secondary">Category:</span>
               <span className="text-primary">{nft.category}</span>
-                        </div>
-                        <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
-                            <span className="text-text-secondary">Views:</span>
+            </div>
+            <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
+              <span className="text-text-secondary">Views:</span>
               <span className="text-primary">{nft.views}</span>
-                        </div>
-                        <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
-                            <span className="text-text-secondary">Favorites:</span>
+            </div>
+            <div className="flex justify-between py-3 border-b border-border last:border-b-0 text-lg">
+              <span className="text-text-secondary">Favorites:</span>
               <span className="text-primary">{nft.favorites}</span>
-                        </div>
-                        <div className="flex justify-between py-3 text-lg">
-                            <span className="text-text-secondary">Price:</span>
+            </div>
+            <div className="flex justify-between py-3 text-lg">
+              <span className="text-text-secondary">Price:</span>
               <span className="text-primary">{nft.price} ETH</span>
-                        </div>
-                    </div>
+            </div>
+          </div>
           <div className="flex flex-col items-center mt-8">
-            <button className="bg-accent-gradient text-background text-lg font-bold py-3 px-8 rounded-xl shadow-md hover:bg-accent-gradient-hover hover:-translate-y-0.5 hover:shadow-lg hover:shadow-glow transition-all uppercase tracking-wide" onClick={handleBuy} disabled={buying}>
-              {buying ? "Processing..." : "Buy Now"}
-            </button>
+            <div className="nft-actions">
+              <button
+                onClick={handleBuy}
+                disabled={buying || !nft.currentlyListed}
+                className={`buy-btn ${!nft.currentlyListed ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {buying ? 'Processing...' : 'Buy NFT'}
+              </button>
+              {/* Show relist button and tag if not currently listed and user is owner */}
+              {!nft.currentlyListed && (nft.owner === (user?.userName || user?.walletAddress)) && (
+                <>
+                  <button
+                    onClick={handleRelist}
+                    className="relist-btn bg-blue-500 text-white px-4 py-2 rounded mt-2"
+                  >
+                    Relist NFT
+                  </button>
+                  <div className="not-available-tag text-red-500 font-bold mt-2">NFT is not available to buy</div>
+                </>
+              )}
+              {/* Show tag if not available to buy and not owner */}
+              {!nft.currentlyListed && nft.owner !== (user?.userName || user?.walletAddress) && (
+                <div className="not-available-tag text-red-500 font-bold mt-2">NFT is not available to buy</div>
+              )}
+            </div>
             <div className="text-center text-primary mt-2">{buyResult}</div>
-                    </div>
-            {/* Show Relist button if user owns the NFT and it's not currently listed */}
-            {nft.owner === user.userName && !nft.currentlyListed && (
-              <div className="my-4">
-                <button
-                  onClick={handleRelist}
-                  disabled={relistLoading}
-                  className="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-8 rounded-lg shadow-md hover:scale-105 transition-transform disabled:opacity-60 text-lg mb-2"
-                >
-                  {relistLoading ? 'Relisting...' : 'Relist NFT'}
-                </button>
-                {relistError && <div className="text-red-400 text-center text-base mt-1">{relistError}</div>}
-                {relistSuccess && <div className="text-green-400 text-center text-base mt-1">{relistSuccess}</div>}
-              </div>
-            )}
-                </div>
-                {/* Vertical Divider */}
-                <div className="w-[2px] bg-white/20 min-h-[500px] mx-4 rounded-full self-stretch" />
-                {/* Right: NFT Image */}
-                <div className="flex-1 flex items-center justify-center">
+          </div>
+        </div>
+        {/* Vertical Divider */}
+        <div className="w-[2px] bg-white/20 min-h-[500px] mx-4 rounded-full self-stretch" />
+        {/* Right: NFT Image */}
+        <div className="flex-1 flex items-center justify-center">
           <div className="bg-[rgba(22,23,27,0.8)] backdrop-blur-[30px] border-2 border-glass-border rounded-2xl shadow-xl p-4 md:p-6 flex items-center justify-center max-w-xl w-full h-auto md:h-[850px]">
             <img src={`https://${nft.imageUrl}`} alt="NFT" className="rounded-2xl w-full h-auto max-h-[400px] md:max-h-[850px] object-cover" />
-                    </div>
-                </div>
-            </div>
-            <Footer />
+          </div>
         </div>
-    );
+      </div>
+      <Footer />
+    </div>
+  );
 }
 
 export default NFT;

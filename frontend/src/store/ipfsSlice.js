@@ -84,6 +84,26 @@ export const fetchDataByName = createAsyncThunk(
   }
 );
 
+export const updateData = createAsyncThunk(
+  "ipfs/updateOnPinata",
+  async ({ id, updatedData }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        "https://metamint.onrender.com/api/update-pinata",
+        { id, updatedData },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 const ipfsSlice = createSlice({
   name: "ipfs",
   initialState,
@@ -154,7 +174,20 @@ const ipfsSlice = createSlice({
       .addCase(fetchDataByName.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      // update data
+      .addCase(updateData.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateData.fulfilled, (state, action) => {
+        state.loading = false;
+        state.uploadResult = action.payload;
+      })
+      .addCase(updateData.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
   },
 });
 

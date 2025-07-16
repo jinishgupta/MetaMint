@@ -6,6 +6,7 @@ import { NFTcontract } from '../contracts/contracts';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { fetchDataByName } from '../store/ipfsSlice';
+import { updateData } from '../store/ipfsSlice';
 
 function AuctionPage() {
   const location = useLocation();
@@ -152,22 +153,13 @@ function AuctionPage() {
       const highestBid = allBids && allBids.length > 0 ? allBids[allBids.length - 1] : null;
       if (highestBid && auction.tokenId) {
         // 2. Fetch NFT metadata from IPFS
-        const nftMetaRes = await fetchDataByName(auctionMeta.nftName || auction.nft_name || auction.name);
+        const nftMetaRes = await dispatch(fetchDataByName(auctionMeta.nftName || auction.nft_name || auction.name));
         const nftFiles = nftMetaRes.payload;
         if (nftFiles && nftFiles.length > 0) {
           const nftFile = nftFiles[0];
-          const nftUrl = nftFile.url;
           const nftId = nftFile.id;
-          const resp = await fetch(nftUrl);
-          const nftMeta = await resp.json();
-          // 3. Update owner field
-          nftMeta.owner = highestBid.name;
-          // 4. Push update to backend
-          await fetch('https://metamint.onrender.com/api/update-pinata', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: nftId, updatedData: nftMeta }),
-          });
+          // 3. Update owner and currentlyListed using updateData
+          await dispatch(updateData({ id: nftId, updatedData: { ...nftFile, owner: highestBid.name, currentlyListed: false } }));
         }
       }
       setSettleSuccess("Auction settled successfully!");

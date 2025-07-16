@@ -171,7 +171,7 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
         address seller = idToListedToken[tokenId].seller;
         require(msg.value == price, "Please submit the asking price in order to complete the purchase");
 
-        idToListedToken[tokenId].currentlyListed = true;
+        idToListedToken[tokenId].currentlyListed = false;
         idToListedToken[tokenId].owner = payable(msg.sender);
         idToListedToken[tokenId].seller = payable(msg.sender);
         _itemsSold.increment();

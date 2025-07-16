@@ -174,7 +174,8 @@ function MintNFT() {
             const nftDataWithTokenId = { 
                 ...nftData, 
                 imageUrl: imageUrl,
-                tokenId: nextTokenId.toString() // Store the tokenId in the metadata as string
+                tokenId: nextTokenId.toString(), // Store the tokenId in the metadata as string
+                currentlyListed: true
             };
             const nftResult = await dispatch(uploadData(nftDataWithTokenId)).unwrap();
             if (nftResult.success) {
