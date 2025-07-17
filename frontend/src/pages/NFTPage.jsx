@@ -27,11 +27,11 @@ function NFT() {
     const updateViews = async () => {
       const updatedNft = { ...nft, views: (parseInt(nft.views) || 0) + 1 };
       setNft(updatedNft);
-      await fetch('https://metamint.onrender.com/api/update-pinata', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: nft.id, updatedData: updatedNft }),
-      });
+      // Only update IPFS if it's a new view
+      if (nft.id) {
+        const updateResult = await dispatch(updateData({ id: nft.id, updatedData: updatedNft }));
+        if (nft.tokenId && updateResult.metadataUrl) await NFTcontract.updateTokenURI(nft.tokenId, updateResult.metadataUrl);
+      }
     };
     updateViews();
     // eslint-disable-next-line
@@ -49,11 +49,11 @@ function NFT() {
       const updatedNft = { ...nft, favorites: (parseInt(nft.favorites) || 0) + 1 };
       setNft(updatedNft);
       setFavorited(true);
-      await fetch('https://metamint.onrender.com/api/update-pinata', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: nft.id, updatedData: updatedNft }),
-      });
+      // Only update IPFS if it's a new favorite
+      if (nft.id) {
+        const updateResult = await dispatch(updateData({ id: nft.id, updatedData: updatedNft }));
+        if (nft.tokenId && updateResult.metadataUrl) await NFTcontract.updateTokenURI(nft.tokenId, updateResult.metadataUrl);
+      }
       if (!favs.includes(nft.name)) {
         favs.push(nft.name);
         localStorage.setItem('favoritedNfts', JSON.stringify(favs));
@@ -63,11 +63,11 @@ function NFT() {
       const updatedNft = { ...nft, favorites: Math.max((parseInt(nft.favorites) || 1) - 1, 0) };
       setNft(updatedNft);
       setFavorited(false);
-      await fetch('https://metamint.onrender.com/api/update-pinata', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: nft.id, updatedData: updatedNft }),
-      });
+      // Only update IPFS if it's a removed favorite
+      if (nft.id) {
+        const updateResult = await dispatch(updateData({ id: nft.id, updatedData: updatedNft }));
+        if (nft.tokenId && updateResult.metadataUrl) await NFTcontract.updateTokenURI(nft.tokenId, updateResult.metadataUrl);
+      }
       favs = favs.filter(name => name !== nft.name);
       localStorage.setItem('favoritedNfts', JSON.stringify(favs));
     }
@@ -128,7 +128,8 @@ function NFT() {
       setNft(updatedNft);
       // Update owner and currentlyListed on IPFS using updateData
       if (nft.id) {
-        await dispatch(updateData({ id: nft.id, updatedData: updatedNft }));
+        const updateResult = await dispatch(updateData({ id: nft.id, updatedData: updatedNft }));
+        if (nft.tokenId && updateResult.metadataUrl) await NFTcontract.updateTokenURI(nft.tokenId, updateResult.metadataUrl);
       }
     } finally {
       setBuying(false);
@@ -154,7 +155,8 @@ function NFT() {
       const updatedNft = { ...nft, currentlyListed: true, price };
       setNft(updatedNft);
       if (nft.id) {
-        await dispatch(updateData({ id: nft.id, updatedData: updatedNft }));
+        const updateResult = await dispatch(updateData({ id: nft.id, updatedData: updatedNft }));
+        if (nft.tokenId && updateResult.metadataUrl) await NFTcontract.updateTokenURI(nft.tokenId, updateResult.metadataUrl);
       }
       alert("NFT relisted successfully!");
     } catch (err) {

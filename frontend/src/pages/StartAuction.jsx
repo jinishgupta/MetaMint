@@ -180,6 +180,7 @@ function StartAuction() {
           const nftFile = nftFiles[0];
           const nftId = nftFile.id;
           await dispatch(updateData({ id: nftId, updatedData: { ...nftFile, currentlyListed: true } }));
+          if (nftId && uploadResult.metadataUrl) await NFTcontract.updateTokenURI(nftId, uploadResult.metadataUrl);
         }
       } catch (err) {
         // Log but don't block UI

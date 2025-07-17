@@ -176,18 +176,7 @@ const ipfsSlice = createSlice({
         state.error = action.payload;
       })
       // update data
-      .addCase(updateData.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateData.fulfilled, (state, action) => {
-        state.loading = false;
-        state.uploadResult = action.payload;
-      })
-      .addCase(updateData.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
+      .addCase
   },
 });
 

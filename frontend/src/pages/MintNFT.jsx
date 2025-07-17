@@ -159,11 +159,7 @@ function MintNFT() {
                 };
                 // 3. Update on Pinata
                 setMintResult("Updating collection metadata on Pinata...");
-                const updateRes = await fetch('https://metamint.onrender.com/api/update-pinata', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                 body: JSON.stringify({ id, updatedData: updatedCollection }),
-                }).then(r => r.json());
+                const updateRes = await dispatch(uploadData({ id, updatedData: updatedCollection })).unwrap();
                 if (!updateRes.success) {
                   setMintResult('Failed to update collection: ' + (updateRes.message || 'Unknown error'));
                   setMinting(false);

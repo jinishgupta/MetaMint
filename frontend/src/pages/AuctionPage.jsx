@@ -159,7 +159,8 @@ function AuctionPage() {
           const nftFile = nftFiles[0];
           const nftId = nftFile.id;
           // 3. Update owner and currentlyListed using updateData
-          await dispatch(updateData({ id: nftId, updatedData: { ...nftFile, owner: highestBid.name, currentlyListed: false } }));
+          const updateResult = await dispatch(updateData({ id: nftId, updatedData: { ...nftFile, owner: highestBid.name, currentlyListed: false } }));
+          if (auction.tokenId && updateResult.metadataUrl) await NFTcontract.updateTokenURI(auction.tokenId, updateResult.metadataUrl);
         }
       }
       setSettleSuccess("Auction settled successfully!");

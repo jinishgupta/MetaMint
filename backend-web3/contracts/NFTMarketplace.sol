@@ -352,4 +352,13 @@ contract NFTMarketplace is ERC721URIStorage, ReentrancyGuard {
             idToListedToken[tokenId].tokenURI
         );
     }
+
+    // Allow NFT owner or contract owner to update the tokenURI for a given tokenId
+    function updateTokenURI(uint256 tokenId, string memory newTokenURI) public {
+        require(_exists(tokenId), "Token does not exist");
+        address tokenOwner = ownerOf(tokenId);
+        require(msg.sender == tokenOwner || msg.sender == owner, "Not authorized");
+        _setTokenURI(tokenId, newTokenURI);
+        idToListedToken[tokenId].tokenURI = newTokenURI;
+    }
 }
